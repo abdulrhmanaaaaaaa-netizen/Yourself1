@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yourself — نظامك المتكامل لإدارة الحياة</title>
+<meta name="description" content="منصة Yourself: نظّم وقتك، احسب راتبك، تابع صحتك، وطوّر نفسك.">
+<link rel="icon" href="https://d.uguu.se/UckCkniA.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═════════════════ شاشة الدخول العائمة ═════════════════ -->
+<div id="authScreen" class="auth-screen">
+  <div class="aurora-bg">
+    <div class="aurora a1"></div>
+    <div class="aurora a2"></div>
+    <div class="aurora a3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="auth-wrapper">
+    <!-- بطاقة عائمة -->
+    <div class="auth-card-float">
+      <div class="auth-glow"></div>
+      
+      <div class="auth-logo-block">
+        <img src="https://d.uguu.se/UckCkniA.jpg" alt="Yourself" class="auth-logo">
+        <h1>Yourself</h1>
+        <p>نظامك المتكامل لإدارة الوقت والمال والصحة</p>
+      </div>
+
+      <div class="auth-tabs-glass">
+        <button class="auth-tab active" onclick="switchTab('login')" id="tabLogin">دخول</button>
+        <button class="auth-tab" onclick="switchTab('register')" id="tabRegister">حساب جديد</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+        <div class="input-float">
+          <input type="email" id="loginEmail" placeholder=" " required autocomplete="email">
+          <label>البريد الإلكتروني</label>
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16v12H4z"/><path d="m4 6 8 7 8-7"/></svg>
+        </div>
+        <div class="input-float">
+          <input type="password" id="loginPassword" placeholder=" " required autocomplete="current-password">
+          <label>كلمة المرور</label>
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        </div>
+        <button type="submit" class="btn-main">
+          <span>تسجيل الدخول</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" class="auth-form hidden" onsubmit="handleRegister(event)">
+        <div class="input-float">
+          <input type="text" id="regName" placeholder=" " required>
+          <label>الاسم الكامل</label>
+        </div>
+        <div class="input-float">
+          <input type="email" id="regEmail" placeholder=" " required autocomplete="email">
+          <label>البريد الإلكتروني</label>
+        </div>
+        <div class="input-float">
+          <input type="password" id="regPassword" placeholder=" " minlength="6" required>
+          <label>كلمة المرور</label>
+        </div>
+        <div class="input-float">
+          <input type="password" id="regConfirm" placeholder=" " minlength="6" required>
+          <label>تأكيد كلمة المرور</label>
+        </div>
+        <button type="submit" class="btn-main">
+          <span>إنشاء الحساب</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </form>
+
+      <div class="auth-footer-note">
+        🔒 بياناتك محفوظة محلياً على جهازك ولا تُرسل لأي خادم
+      </div>
+    </div>
+
+    <!-- الجانب الترويجي (يظهر في الشاشات الكبيرة) -->
+    <div class="auth-showcase">
+      <div class="showcase-pill">✨ الإصدار الاحترافي 2.0</div>
+      <h2>كل ما تحتاجه<br>لإدارة حياتك في مكان واحد</h2>
+      <p>من تتبع ساعات العمل وحساب الراتب، إلى الخطط الغذائية والتمارين، وصولاً إلى مذكرة احترافية وتنظيم يومي ذكي.</p>
+      
+      <div class="showcase-grid">
+        <div class="mini-card"><span>⏱</span><div><strong>تتبع الدوام</strong><p>تسجيل الحضور والانصراف تلقائياً</p></div></div>
+        <div class="mini-card"><span>💰</span><div><strong>حساب الراتب</strong><p>أجر الساعة + الخصومات</p></div></div>
+        <div class="mini-card"><span>🥗</span><div><strong>خطة غذائية</strong><p>سعرات وماكروز دقيقة</p></div></div>
+        <div class="mini-card"><span>🏋️</span><div><strong>تدريب احترافي</strong><p>جدول تمارين كامل</p></div></div>
+        <div class="mini-card"><span>📝</span><div><strong>مذكرة ذكية</strong><p>بحث وتصنيف وألوان</p></div></div>
+        <div class="mini-card"><span>📊</span><div><strong>تقارير شاملة</strong><p>رسوم بيانية حية</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════ معالج الإعداد (Wizard) ═════════════════ -->
+<div id="wizardScreen" class="wizard-screen hidden">
+  <div class="aurora-bg"><div class="aurora a1"></div><div class="aurora a3"></div></div>
+  <div class="wizard-wrapper">
+    <div class="wizard-card">
+      <div class="wizard-header">
+        <img src="https://d.uguu.se/UckCkniA.jpg" alt="Yourself" class="wizard-logo">
+        <div class="wizard-progress-wrap">
+          <div class="wizard-progress-track">
+            <div class="wizard-progress-fill" id="wizProgress"></div>
+          </div>
+          <div class="wizard-dots" id="wizDots"></div>
+        </div>
+      </div>
+      <div class="wizard-body" id="wizardBody"></div>
+      <div class="wizard-footer">
+        <button class="btn-ghost" id="wizPrev" onclick="wizPrev()">→ السابق</button>
+        <div class="wiz-step-info" id="wizStepInfo">الخطوة 1 من 6</div>
+        <button class="btn-main" id="wizNext" onclick="wizNext()">التالي ←</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════ التطبيق الرئيسي ═════════════════ -->
+<div id="appScreen" class="app-screen hidden">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <img src="https://d.uguu.se/UckCkniA.jpg" alt="Yourself" class="sidebar-logo">
+      <div>
+        <div class="sidebar-brand">Yourself</div>
+        <div class="sidebar-sub">الإصدار 2.0</div>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+    
+    <div class="sidebar-foot">
+      <div class="user-pill" id="userPill">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-meta">
+          <div class="user-name" id="userName">مستخدم</div>
+          <div class="user-status" id="userStatus">جاهز</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 8 6 12l4 4M6 12h9"/></svg>
+        <span>خروج</span>
+      </button>
+    </div>
+  </aside>
+
+  <button class="mob-menu" onclick="toggleSidebar()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <div class="mob-overlay" id="mobOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="main-inner" id="mainContent"></div>
+  </main>
+</div>
+
+<!-- Toast + Modals -->
+<div id="toastBox" class="toast-box"></div>
+<div id="modalBox" class="modal-box"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
