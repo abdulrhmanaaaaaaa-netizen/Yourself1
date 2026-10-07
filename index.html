@@ -1,216 +1,534 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#14B8A6">
-  <meta name="description" content="Yourself — عمل، وقت، مال، مذكرة، صحة، وكل ما يخص يومك في مكان واحد.">
-  <title>Yourself — مساحتك الشخصية</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14B8A6">
+<title>Yourself — مساحتك الشخصية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="shell">
-  <div class="glow glow-1"></div><div class="glow glow-2"></div>
 
+<div class="app-shell">
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <!-- ============ AUTH ============ -->
   <section id="authView" class="auth-screen">
-    <div class="auth-hero">
-      <div class="hero-brand">
-        <button id="brandSecret" class="logo secret-logo" type="button" aria-label="Yourself logo">
-          <img src="https://d.uguu.se/UckCkniA.jpg" alt="Yourself" loading="eager" onerror="this.style.display='none';this.parentElement.classList.add('logo-fallback')">
-        </button>
-        <div><span>YOURSELF</span><small>PERSONAL OPERATING SPACE</small></div>
-      </div>
-
-      <div class="hero-copy">
-        <span class="eyebrow">DESIGNED AROUND YOUR DAY</span>
-        <h1>كل يومك.<br><em>مرتب أمامك.</em></h1>
-        <p>احسب قيمة وقتك، راقب دوامك، نظم مهامك، اكتب ملاحظاتك وتابع عاداتك في تجربة واحدة واضحة وهادئة.</p>
-      </div>
-
-      <div class="hero-showcase">
-        <div class="showcase-head"><div><span>نظرة سريعة</span><b>لوحة تعرف ما تحتاجه</b></div><i><u></u> مباشر</i></div>
-        <div class="showcase-grid">
-          <article class="showcase-feature"><small>قيمة الساعة</small><strong id="publicRate">0 EGP</strong><span>تُحسب من راتبك وجدول عملك</span><div class="spark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
-          <article class="showcase-card"><small>وقت العمل</small><b id="publicWork">08:30 → 17:00</b><span>يعمل تلقائيًا حسب جدولك</span></article>
-          <article class="showcase-card"><small>الوقت</small><b>جدول يومي</b><span>مهام · جلسات تركيز · راحة</span></article>
-          <article class="showcase-card"><small>الصحة</small><b>عادات مرنة</b><span>نشاط · نوم · خطة عامة</span></article>
+    <div class="auth-brand-side">
+      <div class="brand-lockup">
+        <div class="brand-mark brand-mark-xl">
+          <img src="https://up6.cc/2026/10/179139150824181.png" alt="Yourself">
+        </div>
+        <div>
+          <span class="eyebrow">YOURSELF · PERSONAL OS</span>
+          <h1>حياتك في مكان واحد.<br><em>بوضوح أكبر.</em></h1>
+          <p>نظّم ساعات عملك، احسب قيمة وقتك، تابع أموالك، خطّط ليومك، سجّل تمارينك، وتحكم في نظامك الغذائي — كل هذا في مساحة واحدة.</p>
         </div>
       </div>
-
-      <div class="hero-points">
-        <span>01</span><div><b>عمل ودخل</b><small>قيمة الساعة والخصومات والإضافات</small></div>
-        <span>02</span><div><b>تنظيم الوقت</b><small>جدول واضح لما بعده</small></div>
-        <span>03</span><div><b>مساحة شخصية</b><small>مذكرة وصحة وعادات وإعدادات</small></div>
+      <div class="feature-row">
+        <span>١</span><div><b>عمل ودخل</b><small>حاسبة بالساعة</small></div>
+        <span>٢</span><div><b>تمارين وجيم</b><small>سجل أحمال</small></div>
+        <span>٣</span><div><b>رجيم وغذاء</b><small>سعرات وماء</small></div>
       </div>
     </div>
 
-    <div class="auth-panel-wrap">
+    <div class="auth-card-wrap">
       <div class="auth-card">
         <div class="auth-mobile-brand">
-          <div class="logo"><img src="https://d.uguu.se/UckCkniA.jpg" alt="Yourself" onerror="this.style.display='none';this.parentElement.classList.add('logo-fallback')"></div>
-          <div><b>Yourself</b><span>مساحتك الشخصية</span></div>
+          <div class="brand-mark"><img src="https://up6.cc/2026/10/179139150824181.png" alt=""></div>
+          <div><strong>Yourself</strong><span>مساحتك الشخصية</span></div>
         </div>
 
-        <div class="auth-intro">
-          <div><span class="kicker">YOURSELF ACCESS</span><h2>مساحتك تبدأ هنا</h2><p>تصميم رسمي، حقول واضحة، ولا حاجة لإعادة كتابة بياناتك بعد التسجيل.</p></div>
-          <div class="trust-badge"><b>✓</b><small>مرتب</small></div>
+        <div class="auth-card-top">
+          <div>
+            <span class="kicker">YOURSELF ACCESS</span>
+            <h2>مساحتك تبدأ من هنا</h2>
+            <p>دخول هادئ ثم نضبط تجربتك حسب حياتك.</p>
+          </div>
         </div>
 
-        <div class="auth-tabs">
-          <button class="auth-tab active" data-auth="login" type="button">تسجيل الدخول</button>
-          <button class="auth-tab" data-auth="register" type="button">إنشاء حساب</button>
+        <div class="mode-tabs">
+          <button class="mode-tab active" type="button" data-auth="login"><span>01</span> تسجيل الدخول</button>
+          <button class="mode-tab" type="button" data-auth="register"><span>02</span> إنشاء حساب</button>
         </div>
 
+        <!-- LOGIN -->
         <form id="loginForm" class="auth-form">
-          <div class="form-head"><span>WELCOME BACK</span><h3>مرحبًا بعودتك</h3><p>أدخل بريدك وكلمة المرور للعودة إلى مساحتك.</p></div>
-          <label>البريد الإلكتروني<div class="input"><i>✉</i><input id="loginEmail" type="email" autocomplete="email" placeholder="name@example.com" required></div></label>
-          <label>كلمة المرور<div class="input"><i>⌑</i><input id="loginPassword" type="password" autocomplete="current-password" placeholder="كلمة المرور" required><button class="show-pass" type="button" data-pass="loginPassword">إظهار</button></div></label>
-          <div class="form-row"><label class="check"><input id="rememberMe" type="checkbox"><span></span> تذكر هذا الجهاز</label><button id="loginHelp" class="link" type="button">مساعدة</button></div>
-          <button class="main-btn" type="submit">دخول إلى Yourself <b>←</b></button>
-          <div id="loginMessage" class="message"></div>
+          <div class="field-block">
+            <label>البريد الإلكتروني</label>
+            <div class="input-shell"><span>✉</span>
+              <input id="loginEmail" type="email" autocomplete="email" placeholder="name@example.com" required>
+            </div>
+          </div>
+          <div class="field-block">
+            <div class="label-line">
+              <label>كلمة المرور</label>
+              <button type="button" class="field-link" data-pass="loginPassword">إظهار</button>
+            </div>
+            <div class="input-shell"><span>⌑</span>
+              <input id="loginPassword" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور" required>
+            </div>
+          </div>
+          <button class="primary-btn full" type="submit"><span>دخول إلى Yourself</span><b>←</b></button>
+          <div id="loginMessage" class="form-message"></div>
         </form>
 
-        <form id="registerForm" class="auth-form hidden">
-          <div class="form-head"><span>CREATE YOUR SPACE</span><h3>إنشاء حساب جديد</h3><p>املأ بياناتك الأساسية مرة واحدة وسيُنشأ حسابك كاملًا مباشرة.</p></div>
-
-          <div class="section-label"><b>01</b><div><strong>الحساب</strong><small>بيانات الدخول</small></div></div>
-          <div class="grid two">
-            <label>الاسم الكامل<div class="input"><i>◉</i><input id="regName" type="text" placeholder="مثال: حيدر" autocomplete="name" required></div></label>
-            <label>البريد الإلكتروني<div class="input"><i>✉</i><input id="regEmail" type="email" placeholder="name@example.com" autocomplete="email" required></div></label>
+        <!-- REGISTER -->
+        <form id="registerForm" class="auth-form register-form hidden">
+          <div class="register-section-title"><span>01</span><div><b>الحساب</b><small>بيانات الدخول</small></div></div>
+          <div class="field-row">
+            <div class="field-block"><label>الاسم الكامل</label>
+              <div class="input-shell"><span>◉</span><input id="regName" type="text" placeholder="حيدر" required></div>
+            </div>
+            <div class="field-block"><label>البريد</label>
+              <div class="input-shell"><span>✉</span><input id="regEmail" type="email" placeholder="name@example.com" required></div>
+            </div>
           </div>
-          <div class="grid two">
-            <label>كلمة المرور<div class="input"><i>⌑</i><input id="regPassword" type="password" minlength="8" placeholder="8 أحرف على الأقل" autocomplete="new-password" required><button class="show-pass" type="button" data-pass="regPassword">إظهار</button></div></label>
-            <label>تأكيد كلمة المرور<div class="input"><i>✓</i><input id="regPassword2" type="password" minlength="8" placeholder="أعد كتابة كلمة المرور" autocomplete="new-password" required></div></label>
+          <div class="field-row">
+            <div class="field-block">
+              <div class="label-line"><label>كلمة المرور</label>
+                <button type="button" class="field-link" data-pass="regPassword">إظهار</button></div>
+              <div class="input-shell"><span>⌑</span><input id="regPassword" type="password" minlength="8" placeholder="8 أحرف" required></div>
+            </div>
+            <div class="field-block"><label>تأكيد</label>
+              <div class="input-shell"><span>✓</span><input id="regPassword2" type="password" minlength="8" placeholder="أعد" required></div>
+            </div>
           </div>
-          <div class="strength"><i></i><i></i><i></i><i></i><small>قوة كلمة المرور</small></div>
-
-          <div class="section-label"><b>02</b><div><strong>العمل والدخل</strong><small>لحساب قيمة ساعتك تلقائيًا</small></div></div>
-          <div class="grid two">
-            <label>الوظيفة / المجال<div class="input"><i>⌘</i><input id="regJob" type="text" placeholder="مثال: مطور مواقع" required></div></label>
-            <label>نوع الدخل<select id="regSalaryType"><option value="monthly">راتب شهري</option><option value="hourly">أجر بالساعة</option></select></label>
-            <label>الدخل<div class="input"><i>EGP</i><input id="regSalary" type="number" min="0" step="0.01" placeholder="8750" required></div></label>
-            <label>أيام العمل بالأسبوع<select id="regWorkDays"><option value="5" selected>5 أيام</option><option value="6">6 أيام</option><option value="7">7 أيام</option><option value="4">4 أيام</option><option value="3">3 أيام</option></select></label>
-            <label>بداية العمل<input id="regStart" type="time" value="08:30" required></label>
-            <label>نهاية العمل<input id="regEnd" type="time" value="17:00" required></label>
-            <label class="full">أيام الإجازة<input id="regOff" type="text" value="الجمعة، السبت" placeholder="مثال: الجمعة، السبت"></label>
-          </div>
-
-          <div class="section-label"><b>03</b><div><strong>روتين اليوم</strong><small>للجدول وتنظيم الوقت</small></div></div>
-          <div class="grid two">
-            <label>وقت الاستيقاظ<input id="regWake" type="time" value="07:00"></label>
-            <label>وقت النوم<input id="regSleep" type="time" value="23:00"></label>
-            <label>وقت الذهاب للعمل<input id="regGo" type="time" value="08:00"></label>
-            <label>وقت الرجوع<input id="regBack" type="time" value="17:30"></label>
-            <label>الهدف الأساسي<select id="regGoal"><option>تنظيم الوقت</option><option>زيادة الدخل</option><option>الالتزام بالعمل</option><option>تحسين العادات الصحية</option><option>التوازن بين العمل والحياة</option></select></label>
-            <label>مستوى النشاط<select id="regActivity"><option value="light">خفيف</option><option value="moderate" selected>متوسط</option><option value="high">مرتفع</option></select></label>
+          <div class="password-strength">
+            <span></span><span></span><span></span><span></span>
+            <small>قوة كلمة المرور · ابدأ بالكتابة</small>
           </div>
 
-          <div class="section-label"><b>04</b><div><strong>بياناتك الصحية</strong><small>اختيارية</small></div></div>
-          <div class="grid three">
-            <label>العمر<input id="regAge" type="number" min="1" max="120" placeholder="25"></label>
-            <label>الوزن (كجم)<input id="regWeight" type="number" min="1" step="0.1" placeholder="70"></label>
-            <label>الطول (سم)<input id="regHeight" type="number" min="50" max="250" step="0.1" placeholder="175"></label>
+          <div class="register-section-title"><span>02</span><div><b>العمل والدخل</b><small>لحساب قيمة ساعتك</small></div></div>
+          <div class="field-row">
+            <div class="field-block"><label>الوظيفة</label>
+              <div class="input-shell"><span>⌘</span><input id="regJob" type="text" placeholder="مطور، مهندس" required></div>
+            </div>
+            <div class="field-block"><label>نوع الدخل</label>
+              <select id="regSalaryType"><option value="monthly">شهري</option><option value="hourly">بالساعة</option></select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-block"><label>الدخل</label>
+              <div class="input-shell"><span>EGP</span><input id="regSalary" type="number" min="0" step="0.01" placeholder="8750" required></div>
+            </div>
+            <div class="field-block"><label>أيام/أسبوع</label>
+              <select id="regWorkDays"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option></select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-block"><label>بداية العمل</label><input id="regStart" type="time" value="08:30" required></div>
+            <div class="field-block"><label>نهاية العمل</label><input id="regEnd" type="time" value="17:00" required></div>
+          </div>
+          <div class="field-block"><label>أيام الإجازة</label>
+            <input id="regOff" type="text" value="الجمعة، السبت">
           </div>
 
-          <div class="register-note"><b>✓</b><span><strong>كل شيء سيتم حفظه الآن.</strong><small>لن تظهر لك شاشة أسئلة ثانية بعد التسجيل.</small></span></div>
-          <label class="check"><input id="regAgree" type="checkbox" required><span></span> أوافق على حفظ بياناتي داخل هذا المتصفح.</label>
-          <button class="main-btn" type="submit">إنشاء الحساب وبدء Yourself <b>←</b></button>
-          <div id="registerMessage" class="message"></div>
+          <div class="register-section-title"><span>03</span><div><b>روتين اليوم</b><small>لجدول مناسب</small></div></div>
+          <div class="field-row">
+            <div class="field-block"><label>الاستيقاظ</label><input id="regWake" type="time" value="07:00"></div>
+            <div class="field-block"><label>النوم</label><input id="regSleep" type="time" value="23:00"></div>
+          </div>
+          <div class="field-row">
+            <div class="field-block"><label>الذهاب</label><input id="regGo" type="time" value="08:00"></div>
+            <div class="field-block"><label>الرجوع</label><input id="regBack" type="time" value="17:30"></div>
+          </div>
+          <div class="field-row">
+            <div class="field-block"><label>الهدف</label>
+              <select id="regGoal">
+                <option>تنظيم الوقت</option><option>زيادة الدخل</option>
+                <option>اللياقة البدنية</option><option>نظام غذائي صحي</option>
+                <option>التوازن بين العمل والحياة</option>
+              </select>
+            </div>
+            <div class="field-block"><label>النشاط</label>
+              <select id="regActivity">
+                <option value="light">خفيف</option><option value="moderate" selected>متوسط</option><option value="high">مرتفع</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="register-section-title"><span>04</span><div><b>بيانات صحية</b><small>اختياري</small></div></div>
+          <div class="field-row three-fields">
+            <div class="field-block"><label>العمر</label><input id="regAge" type="number" min="1" max="120" placeholder="25"></div>
+            <div class="field-block"><label>الوزن</label><input id="regWeight" type="number" step="0.1" placeholder="70"></div>
+            <div class="field-block"><label>الطول</label><input id="regHeight" type="number" step="0.1" placeholder="175"></div>
+          </div>
+
+          <button class="primary-btn full" type="submit"><span>إنشاء حساب وبدء Yourself</span><b>←</b></button>
+          <div id="registerMessage" class="form-message"></div>
         </form>
 
-        <div class="auth-footer"><span>⌁ مساحة منظمة حول يومك</span><button id="demoBtn" class="link" type="button">استكشاف الواجهة</button></div>
+        <div class="auth-footer">
+          <span><i class="shield">✓</i> جلسة محلية · Yourself</span>
+          <button type="button" class="ghost-mini" id="showDemoBtn">استكشاف</button>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="appView" class="app hidden">
+  <!-- ============ APP ============ -->
+  <section id="appView" class="app-view hidden">
     <header class="topbar">
-      <div class="brandline"><div class="logo"><img src="https://d.uguu.se/UckCkniA.jpg" alt="Yourself" onerror="this.style.display='none';this.parentElement.classList.add('logo-fallback')"></div><div><b>Yourself</b><span>مساحتك الشخصية</span></div></div>
-      <div class="top-actions"><button id="searchBtn" class="icon-btn" type="button">⌕</button><button id="profileBtn" class="profile-btn" type="button"><span id="avatar">Y</span><span><b id="topName">Yourself</b><small id="topJob">ملف شخصي</small></span><i>⌄</i></button></div>
+      <div class="topbar-brand" id="brandSecret">
+        <div class="brand-mark"><img src="https://up6.cc/2026/10/179139150824181.png" alt="Yourself"></div>
+        <div><b>Yourself</b><span>مساحتك الشخصية</span></div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="searchBtn" title="بحث">⌕</button>
+        <button class="profile-chip" id="profileBtn">
+          <span class="avatar" id="avatar">Y</span>
+          <span><b id="topName">Yourself</b><small id="topJob">مساحتك</small></span>
+        </button>
+      </div>
     </header>
 
-    <div class="layout">
-      <aside id="sidebar" class="sidebar">
-        <div class="side-head"><span>لوحة التحكم</span><b id="greeting">مرحبًا</b></div>
-        <nav>
-          <button class="nav active" data-page="home">⌂ <span>الرئيسية</span></button>
-          <button class="nav" data-page="work">◷ <span>العمل والدخل</span></button>
-          <button class="nav" data-page="planner">☷ <span>تنظيم الوقت</span></button>
-          <button class="nav" data-page="notes">✎ <span>المذكرة</span></button>
-          <button class="nav" data-page="health">♡ <span>الصحة والنشاط</span></button>
-          <button class="nav" data-page="settings">⚙ <span>الإعدادات</span></button>
+    <div class="app-layout">
+      <aside class="sidebar">
+        <nav class="main-nav">
+          <button class="nav-item active" data-page="dashboard"><i>⌂</i><span>الرئيسية</span></button>
+          <button class="nav-item" data-page="work"><i>◷</i><span>العمل والدخل</span></button>
+          <button class="nav-item" data-page="planner"><i>☷</i><span>تنظيم الوقت</span></button>
+          <button class="nav-item" data-page="notes"><i>✎</i><span>المذكرة</span></button>
+          <button class="nav-item" data-page="exercise"><i>⚡</i><span>التمارين والجيم</span></button>
+          <button class="nav-item" data-page="diet"><i>🍎</i><span>الرجيم والغذاء</span></button>
+          <button class="nav-item" data-page="health"><i>♡</i><span>الصحة والعادات</span></button>
+          <button class="nav-item" data-page="settings"><i>⚙</i><span>الإعدادات</span></button>
         </nav>
-        <div class="side-bottom"><div class="side-status"><span>حالة اليوم</span><b id="sideState">—</b><small id="sideMeta">—</small></div><button id="logout" class="logout" type="button">تسجيل الخروج ↗</button></div>
+        <div class="sidebar-bottom">
+          <div class="mini-card">
+            <span>حالتك اليوم</span>
+            <strong id="sideState">منظم ✦</strong>
+            <small id="sideMeta">ابدأ بأهم مهمة</small>
+          </div>
+          <button id="logoutBtn" class="logout-btn">تسجيل الخروج ↗</button>
+        </div>
       </aside>
 
-      <main class="main">
-        <section id="page-home" class="page active-page">
-          <div class="page-head"><div><span class="kicker">YOUR SPACE</span><h1>مرحبًا، <em id="heroName">صاحب المساحة</em> 👋</h1><p id="todayText">—</p></div><div class="date-card"><span id="weekday">—</span><b id="dateText">—</b></div></div>
-          <div class="stats">
-            <article class="stat hero-stat"><span>قيمة الساعة</span><strong id="hourRate">0</strong><small>EGP / ساعة</small><i>↗</i></article>
-            <article class="stat"><span>المكتسب اليوم</span><strong id="todayEarned">0</strong><small>حتى الآن</small><i>◷</i></article>
-            <article class="stat"><span>ساعات اليوم</span><strong id="todayHours">0h</strong><small id="todayHoursMeta">حسب جدولك</small><i>▦</i></article>
-            <article class="stat"><span>مهام اليوم</span><strong id="todayTasks">0</strong><small>في جدولك</small><i>✓</i></article>
+      <main class="content">
+        <!-- DASHBOARD -->
+        <section id="page-dashboard" class="page active-page">
+          <div class="page-hero">
+            <div>
+              <span class="kicker">YOUR SPACE</span>
+              <h1>مرحبًا، <span id="heroName">صديقي</span> 👋</h1>
+              <p id="todayText">اليوم يوم جديد. رتّبه كما تحب.</p>
+            </div>
+            <div class="date-badge"><span id="weekday">—</span><b id="dateText">—</b></div>
           </div>
 
-          <div class="two-col">
-            <article class="panel work-panel">
-              <div class="panel-head"><div><span class="kicker">SMART CLOCK</span><h2>عداد العمل الذكي</h2></div><span id="clockBadge" class="badge">—</span></div>
+          <div class="stats-grid four">
+            <article class="metric-card featured"><span>قيمة الساعة</span><strong id="hourRate">0</strong><small>EGP / ساعة</small></article>
+            <article class="metric-card"><span>المكتسب اليوم</span><strong id="todayEarned">0</strong><small>حتى الآن</small></article>
+            <article class="metric-card"><span>ساعات العمل</span><strong id="todayHours">0h</strong><small id="todayHoursMeta">—</small></article>
+            <article class="metric-card"><span>مهام اليوم</span><strong id="todayTasks">0</strong><small>في خطتك</small></article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <div><span class="kicker">SMART CLOCK</span><h2>عداد العمل الذكي</h2></div>
+                <span class="status-pill" id="clockBadge">—</span>
+              </div>
               <div class="work-clock">
-                <div class="clock"><div><strong id="timer">00:00:00</strong><span>احتساب فعلي</span></div></div>
-                <div class="clock-details"><div class="smart-card"><b id="clockState">—</b><span id="clockMeta">—</span></div><div class="earn-card"><span>قيمة الوقت اليوم</span><b id="clockEarn">0 EGP</b></div><div class="actions"><button id="manualStart" class="main-btn small" type="button">بدء يدوي</button><button id="manualStop" class="ghost-btn small" type="button" disabled>إنهاء يدوي</button></div><small class="fine">يُحسب العمل من وقت البداية والنهاية وأيام الإجازة. إغلاق المتصفح لا يوقف الحساب التلقائي.</small></div>
+                <div class="clock-ring"><span id="timer">00:00:00</span><small>محسوب من جدولك</small></div>
+                <div class="work-clock-info">
+                  <div class="smart-status-card"><strong id="clockState">—</strong><span id="clockMeta">—</span></div>
+                  <div class="earning-live"><span>المكتسب اليوم</span><b id="clockEarn">0 EGP</b></div>
+                  <div class="clock-actions">
+                    <button id="manualStart" class="primary-btn">بدء يدوي</button>
+                    <button id="manualStop" class="secondary-btn" disabled>إنهاء</button>
+                  </div>
+                </div>
               </div>
             </article>
 
             <article class="panel">
-              <div class="panel-head"><div><span class="kicker">NEXT</span><h2>ماذا بعد؟</h2></div><button class="link" data-page="planner" type="button">الجدول</button></div>
-              <div id="nextList" class="timeline"></div>
+              <div class="panel-head">
+                <div><span class="kicker">TODAY</span><h2>ماذا بعد؟</h2></div>
+                <button class="text-button" data-page="planner">الجدول</button>
+              </div>
+              <div id="nextList" class="timeline-mini"></div>
             </article>
           </div>
 
-          <div class="two-col lower">
-            <article class="panel"><div class="panel-head"><div><span class="kicker">MONEY FLOW</span><h2>ملخص المال</h2></div><button class="link" data-page="work" type="button">التفاصيل</button></div><div class="money-summary"><div><span>الدخل الأساسي</span><b id="baseMoney">0</b></div><div><span>خصومات</span><b id="deductMoney">0</b></div><div><span>إضافي</span><b id="extraMoney">0</b></div><div class="net"><span>صافي تقديري</span><b id="netMoney">0 EGP</b></div></div></article>
-            <article class="panel"><div class="panel-head"><div><span class="kicker">NOTES</span><h2>آخر الملاحظات</h2></div><button class="link" data-page="notes" type="button">المذكرة</button></div><div id="notePreview" class="preview-notes"></div></article>
+          <div class="dashboard-grid lower">
+            <article class="panel">
+              <div class="panel-head">
+                <div><span class="kicker">MONEY</span><h2>ملخص المال</h2></div>
+                <button class="text-button" data-page="work">التفاصيل</button>
+              </div>
+              <div class="money-hero"><div><span>الصافي هذا الشهر</span><strong id="netMoney">0 EGP</strong></div></div>
+              <div class="money-list">
+                <div><span>الأساسي</span><b id="baseMoney">0</b></div>
+                <div><span>الخصومات</span><b id="deductMoney">0</b></div>
+                <div><span>إضافي</span><b id="extraMoney">0</b></div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div><span class="kicker">NOTES</span><h2>آخر ملاحظاتك</h2></div>
+                <button class="text-button" data-page="notes">المذكرة</button>
+              </div>
+              <div id="notePreview" class="note-preview-list"></div>
+            </article>
           </div>
         </section>
 
+        <!-- WORK -->
         <section id="page-work" class="page">
-          <div class="page-title"><div><span class="kicker">WORK & MONEY</span><h1>العمل والدخل</h1><p>كل ساعة لها قيمة واضحة، وكل خصم أو إضافة محفوظ في سجل مستقل.</p></div><button id="editWork" class="ghost-btn" type="button">تعديل بيانات العمل</button></div>
-          <div class="work-grid"><article class="panel"><div class="panel-head"><div><span class="kicker">RATE ENGINE</span><h2>قيمة ساعتك</h2></div><span class="badge good">تلقائي</span></div><div class="rate-box"><small>لكل ساعة</small><strong id="bigRate">0</strong><span>EGP</span></div><div class="rate-details"><div><span>الدخل</span><b id="workSalary">0</b></div><div><span>ساعات/يوم</span><b id="workHoursDay">0</b></div><div><span>أيام/أسبوع</span><b id="workDays">0</b></div><div><span>الجدول</span><b id="workSchedule">—</b></div></div><div class="month-progress"><div><span>ساعات الشهر المجدولة</span><b id="monthPct">0%</b></div><i><u id="monthBar"></u></i></div></article><article class="panel"><div class="panel-head"><div><span class="kicker">MONEY ACTIONS</span><h2>الخصومات والإضافات</h2></div><button id="addMoney" class="main-btn small" type="button">+ إضافة</button></div><div id="moneyList" class="money-list"></div></article></div>
-          <article class="panel table-panel"><div class="panel-head"><div><span class="kicker">RECENT MONEY</span><h2>السجل</h2></div><div class="filters"><button class="filter active" data-money="all" type="button">الكل</button><button class="filter" data-money="deduction" type="button">خصومات</button><button class="filter" data-money="extra" type="button">إضافي</button></div></div><div class="table-wrap"><table><thead><tr><th>الوصف</th><th>النوع</th><th>المبلغ</th><th>التاريخ</th><th></th></tr></thead><tbody id="moneyTable"></tbody></table></div></article>
+          <div class="section-heading">
+            <div><span class="kicker">WORK & MONEY</span><h1>العمل والدخل</h1>
+              <p>احسب قيمة وقتك وسجّل الخصومات والإضافات.</p></div>
+            <button id="editWorkBtn" class="secondary-btn">تعديل بيانات العمل</button>
+          </div>
+          <div class="work-page-grid">
+            <article class="panel">
+              <div class="panel-head"><div><span class="kicker">RATE</span><h2>حاسبة الساعة</h2></div></div>
+              <div class="rate-big"><span>EGP</span><strong id="bigRate">0</strong><small>لكل ساعة</small></div>
+              <div class="rate-breakdown">
+                <div><span>الدخل الأساسي</span><b id="workSalary">0</b></div>
+                <div><span>ساعات/يوم</span><b id="workHoursDay">0</b></div>
+                <div><span>أيام/أسبوع</span><b id="workDays">0</b></div>
+                <div><span>الدوام</span><b id="workSchedule">—</b></div>
+              </div>
+              <div class="progress-line">
+                <span>تقدم الشهر</span><div><i id="monthBar"></i></div><b id="monthPct">0%</b>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div><span class="kicker">TRANSACTIONS</span><h2>الحركات المالية</h2></div>
+                <button id="addMoneyBtn" class="primary-btn small">+ إضافة</button>
+              </div>
+              <div id="moneyList" class="money-items"></div>
+            </article>
+          </div>
+
+          <article class="panel" style="margin-top:16px">
+            <div class="panel-head">
+              <div><span class="kicker">HISTORY</span><h2>سجل العمليات</h2></div>
+              <div class="filter-row">
+                <button class="filter active" data-money="all">الكل</button>
+                <button class="filter" data-money="deduction">خصومات</button>
+                <button class="filter" data-money="extra">إضافي</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>الوصف</th><th>النوع</th><th>المبلغ</th><th>التاريخ</th><th></th></tr></thead>
+                <tbody id="moneyTable"></tbody>
+              </table>
+            </div>
+          </article>
         </section>
 
+        <!-- PLANNER -->
         <section id="page-planner" class="page">
-          <div class="page-title"><div><span class="kicker">TIME OS</span><h1>تنظيم الوقت</h1><p>جدول بصري لليوم مع وقت العمل والروتين والمهام.</p></div><button id="addTask" class="main-btn" type="button">+ مهمة جديدة</button></div>
-          <div class="day-toolbar panel"><button id="prevDay" class="circle" type="button">→</button><div><span id="planDay">اليوم</span><b id="planDate">—</b></div><button id="nextDay" class="circle" type="button">←</button><button id="todayBtn" class="ghost-btn small" type="button">اليوم</button></div>
-          <div class="planner"><article class="panel"><div id="schedule" class="schedule"></div></article><aside class="planner-side"><article class="panel"><div class="panel-head"><div><span class="kicker">ROUTINE</span><h2>روتينك</h2></div></div><div id="routine" class="routine"></div></article><article class="panel focus-panel"><span class="kicker">FOCUS MODE</span><h2>جلسة تركيز</h2><strong id="focusTimer">25:00</strong><div class="actions"><button id="focusToggle" class="main-btn small" type="button">بدء</button><button id="focusReset" class="ghost-btn small" type="button">إعادة</button></div></article></aside></div>
+          <div class="section-heading">
+            <div><span class="kicker">TIME OS</span><h1>تنظيم الوقت</h1><p>ابنِ يومك حول العمل والراحة والتركيز.</p></div>
+            <button id="addTaskBtn" class="primary-btn">+ مهمة جديدة</button>
+          </div>
+          <div class="planner-toolbar panel">
+            <button id="prevDayBtn" class="circle-nav">→</button>
+            <div class="planner-date"><span id="planDay">—</span><b id="planDate">—</b></div>
+            <button id="nextDayBtn" class="circle-nav">←</button>
+            <button id="todayBtn" class="secondary-btn small">اليوم</button>
+          </div>
+          <div class="planner-layout">
+            <article class="panel"><div id="schedule" class="schedule-grid"></div></article>
+            <aside class="planner-aside">
+              <article class="panel">
+                <div class="panel-head"><div><span class="kicker">ROUTINE</span><h2>روتينك</h2></div></div>
+                <div id="routine" class="routine-summary"></div>
+              </article>
+              <article class="panel focus-panel">
+                <span class="kicker">FOCUS</span><h2>جلسة تركيز</h2>
+                <div class="focus-timer" id="focusTimer">25:00</div>
+                <div class="focus-actions">
+                  <button id="focusToggle" class="primary-btn small">بدء</button>
+                  <button id="focusReset" class="secondary-btn small">إعادة</button>
+                </div>
+              </article>
+            </aside>
+          </div>
         </section>
 
+        <!-- NOTES -->
         <section id="page-notes" class="page">
-          <div class="page-title"><div><span class="kicker">YOUR JOURNAL</span><h1>المذكرة</h1><p>ملاحظاتك وأفكارك في مكان أنيق وسهل البحث.</p></div><button id="newNote" class="main-btn" type="button">+ ملاحظة جديدة</button></div>
-          <div class="notes-toolbar panel"><div class="search"><span>⌕</span><input id="noteSearch" type="search" placeholder="ابحث في الملاحظات..."></div><div class="filters"><button class="filter active" data-note="all" type="button">الكل</button><button class="filter" data-note="pinned" type="button">مثبتة</button><button class="filter" data-note="work" type="button">عمل</button><button class="filter" data-note="personal" type="button">شخصية</button></div></div><div id="notesGrid" class="notes-grid"></div>
+          <div class="section-heading">
+            <div><span class="kicker">JOURNAL</span><h1>المذكرة</h1><p>اكتب أفكارك وما تريد الرجوع إليه.</p></div>
+            <button id="newNoteBtn" class="primary-btn">+ ملاحظة</button>
+          </div>
+          <div class="notes-toolbar panel">
+            <div class="search-box"><span>⌕</span><input id="noteSearch" type="search" placeholder="ابحث..."></div>
+            <div class="filter-row">
+              <button class="filter active" data-note="all">الكل</button>
+              <button class="filter" data-note="pinned">مثبتة</button>
+              <button class="filter" data-note="work">عمل</button>
+              <button class="filter" data-note="personal">شخصية</button>
+            </div>
+          </div>
+          <div id="notesGrid" class="notes-grid"></div>
         </section>
 
+        <!-- EXERCISE / GYM -->
+        <section id="page-exercise" class="page">
+          <div class="section-heading">
+            <div><span class="kicker">TRAINING</span><h1>التمارين والجيم</h1><p>سجّل مجموعاتك، تكراراتك، وأوزانك.</p></div>
+            <button id="addWorkoutBtn" class="primary-btn">+ تمرين جديد</button>
+          </div>
+
+          <div class="stats-grid four">
+            <article class="metric-card featured"><span>تمارين الأسبوع</span><strong id="wkWorkouts">0</strong><small>جلسة</small></article>
+            <article class="metric-card"><span>إجمالي التكرارات</span><strong id="wkReps">0</strong><small>تكرار</small></article>
+            <article class="metric-card"><span>الحجم الكلي</span><strong id="wkVolume">0</strong><small>كجم</small></article>
+            <article class="metric-card"><span>دقائق النشاط</span><strong id="wkMinutes">0</strong><small>دقيقة</small></article>
+          </div>
+
+          <div class="exercise-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <div><span class="kicker">LOG</span><h2>سجل التمارين</h2></div>
+                <div class="filter-row">
+                  <button class="filter active" data-ex="all">الكل</button>
+                  <button class="filter" data-ex="gym">جيم</button>
+                  <button class="filter" data-ex="cardio">كارديو</button>
+                  <button class="filter" data-ex="home">منزلي</button>
+                  <button class="filter" data-ex="flex">تمدد</button>
+                </div>
+              </div>
+              <div id="workoutList" class="workout-list"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head"><div><span class="kicker">WEEK</span><h2>نشاط الأسبوع</h2></div></div>
+              <div id="weekChart" class="week-chart"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- DIET -->
+        <section id="page-diet" class="page">
+          <div class="section-heading">
+            <div><span class="kicker">NUTRITION</span><h1>الرجيم والغذاء</h1><p>تابع وجباتك، الماء، والسعرات.</p></div>
+            <button id="addMealBtn" class="primary-btn">+ وجبة</button>
+          </div>
+
+          <div class="stats-grid four">
+            <article class="metric-card featured"><span>سعرات اليوم</span><strong id="calToday">0</strong><small>kcal</small></article>
+            <article class="metric-card"><span>الهدف</span><strong id="calGoal">2000</strong><small>kcal</small></article>
+            <article class="metric-card"><span>الماء</span><strong id="waterCount">0/8</strong><small>كوب</small></article>
+            <article class="metric-card"><span>البروتين</span><strong id="proteinToday">0g</strong><small>تقديري</small></article>
+          </div>
+
+          <div class="diet-grid">
+            <article class="panel">
+              <div class="panel-head"><div><span class="kicker">MEALS</span><h2>وجبات اليوم</h2></div></div>
+              <div id="mealsList" class="meals-list"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head"><div><span class="kicker">WATER</span><h2>الترطيب</h2></div></div>
+              <div class="water-grid" id="waterGrid"></div>
+              <button id="addWaterBtn" class="primary-btn full" style="margin-top:14px">+ كوب ماء</button>
+              <button id="resetWaterBtn" class="ghost-btn full" style="margin-top:6px">تصفير الماء</button>
+            </article>
+          </div>
+        </section>
+
+        <!-- HEALTH -->
         <section id="page-health" class="page">
-          <div class="page-title"><div><span class="kicker">WELLNESS</span><h1>الصحة والنشاط</h1><p>متابعة عامة للبيانات والعادات مع خطط مرنة، وليست تشخيصًا طبيًا.</p></div><button id="editHealth" class="ghost-btn" type="button">تعديل البيانات</button></div>
-          <div class="health-grid"><article class="panel"><div class="panel-head"><div><span class="kicker">PROFILE</span><h2>بياناتك</h2></div><span class="badge">خاص</span></div><div class="body-stats"><div><span>العمر</span><b id="healthAge">—</b><small>سنة</small></div><div><span>الوزن</span><b id="healthWeight">—</b><small>كجم</small></div><div><span>الطول</span><b id="healthHeight">—</b><small>سم</small></div></div><div class="info-note"><b>ملاحظة</b><span>استخدم البيانات للمتابعة الشخصية العامة فقط.</span></div></article><article class="panel"><div class="panel-head"><div><span class="kicker">TODAY HABITS</span><h2>عادات اليوم</h2></div><b id="habitPct">0%</b></div><div id="habits" class="habits"></div></article><article class="panel"><div class="panel-head"><div><span class="kicker">YOUR PLAN</span><h2>الخطة الحالية</h2></div><button id="changePlan" class="link" type="button">تغيير</button></div><div id="healthPlan" class="health-plan"></div></article></div>
+          <div class="section-heading">
+            <div><span class="kicker">WELLNESS</span><h1>الصحة والعادات</h1><p>متابعة عامة لعاداتك وبياناتك.</p></div>
+            <button id="editHealthBtn" class="secondary-btn">تعديل البيانات</button>
+          </div>
+          <div class="health-grid">
+            <article class="panel">
+              <div class="panel-head"><div><span class="kicker">PROFILE</span><h2>بياناتك</h2></div></div>
+              <div class="body-stats">
+                <div><span>العمر</span><b id="healthAge">—</b><small>سنة</small></div>
+                <div><span>الوزن</span><b id="healthWeight">—</b><small>كجم</small></div>
+                <div><span>الطول</span><b id="healthHeight">—</b><small>سم</small></div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div><span class="kicker">HABITS</span><h2>عادات اليوم</h2></div>
+                <span id="habitPct">0%</span>
+              </div>
+              <div id="habits" class="habit-list"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div><span class="kicker">PLAN</span><h2>الخطة المقترحة</h2></div>
+                <button id="changePlanBtn" class="text-button">تغيير</button>
+              </div>
+              <div id="healthPlan" class="wellness-plan"></div>
+            </article>
+          </div>
         </section>
 
+        <!-- SETTINGS -->
         <section id="page-settings" class="page">
-          <div class="page-title"><div><span class="kicker">SETTINGS</span><h1>الإعدادات</h1><p>حدّث معلوماتك وشكل Yourself.</p></div></div>
-          <div class="settings-grid"><article class="panel form-panel"><div class="panel-head"><div><span class="kicker">PROFILE</span><h2>الملف الشخصي</h2></div></div><form id="settingsForm" class="grid two"><label>الاسم<input id="setName" type="text"></label><label>البريد الإلكتروني<input id="setEmail" type="email" disabled></label><label>الوظيفة<input id="setJob" type="text"></label><label>الهدف<select id="setGoal"><option>تنظيم الوقت</option><option>زيادة الدخل</option><option>الالتزام بالعمل</option><option>تحسين العادات الصحية</option><option>التوازن بين العمل والحياة</option></select></label><label>بداية العمل<input id="setStart" type="time"></label><label>نهاية العمل<input id="setEnd" type="time"></label><div class="full settings-buttons"><button class="main-btn" type="submit">حفظ التغييرات</button><button id="deleteLocal" class="danger-btn" type="button">حذف الحساب المحلي</button></div></form></article><article class="panel"><div class="panel-head"><div><span class="kicker">APPEARANCE</span><h2>المظهر</h2></div></div><div class="themes"><button class="theme active" data-theme="mint" type="button"><i></i><b>Mint</b><small>اللون الأساسي</small></button><button class="theme" data-theme="night" type="button"><i></i><b>Night</b><small>داكن وهادئ</small></button><button class="theme" data-theme="sand" type="button"><i></i><b>Sand</b><small>دافئ ونظيف</small></button></div><div class="settings-note">بيانات هذه النسخة تُحفظ محليًا في المتصفح. للموقع المنشور تحتاج مصادقة وقاعدة بيانات في الخادم.</div></article></div>
+          <div class="section-heading">
+            <div><span class="kicker">SETTINGS</span><h1>الإعدادات</h1><p>عدّل معلوماتك وشكل تجربتك.</p></div>
+          </div>
+          <div class="settings-grid">
+            <article class="panel">
+              <div class="panel-head"><div><span class="kicker">PROFILE</span><h2>بيانات الحساب</h2></div></div>
+              <form id="settingsForm" class="field-grid two">
+                <label>الاسم<input id="setName" type="text"></label>
+                <label>البريد<input id="setEmail" type="email" disabled></label>
+                <label>الوظيفة<input id="setJob" type="text"></label>
+                <label>الهدف
+                  <select id="setGoal">
+                    <option>تنظيم الوقت</option><option>زيادة الدخل</option>
+                    <option>اللياقة البدنية</option><option>نظام غذائي صحي</option>
+                    <option>التوازن بين العمل والحياة</option>
+                  </select>
+                </label>
+                <label>بداية العمل<input id="setStart" type="time"></label>
+                <label>نهاية العمل<input id="setEnd" type="time"></label>
+                <label>هدف السعرات<input id="setCalGoal" type="number" min="800" max="6000" step="50"></label>
+                <label>هدف الماء (كوب)<input id="setWaterGoal" type="number" min="1" max="20"></label>
+                <div class="span-2 settings-actions">
+                  <button class="primary-btn" type="submit">حفظ</button>
+                  <button id="deleteLocalBtn" class="danger-btn" type="button">حذف الحساب</button>
+                </div>
+              </form>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head"><div><span class="kicker">THEME</span><h2>المظهر</h2></div></div>
+              <div class="theme-choice">
+                <button class="theme active" data-theme="mint"><span></span><b>Mint</b><small>النعناع</small></button>
+                <button class="theme" data-theme="night"><span></span><b>Night</b><small>ليلي</small></button>
+                <button class="theme" data-theme="sand"><span></span><b>Sand</b><small>رملي</small></button>
+                <button class="theme" data-theme="rose"><span></span><b>Rose</b><small>وردي</small></button>
+                <button class="theme" data-theme="ocean"><span></span><b>Ocean</b><small>محيطي</small></button>
+                <button class="theme" data-theme="forest"><span></span><b>Forest</b><small>غابة</small></button>
+              </div>
+            </article>
+          </div>
         </section>
+
       </main>
     </div>
-    <nav class="mobile-nav"><button data-page="home" type="button">⌂<span>الرئيسية</span></button><button data-page="work" type="button">◷<span>العمل</span></button><button data-page="planner" type="button">☷<span>الوقت</span></button><button data-page="notes" type="button">✎<span>المذكرة</span></button><button data-page="health" type="button">♡<span>الصحة</span></button></nav>
   </section>
 
   <div id="modal" class="modal hidden"></div>
-  <div id="toast" class="toast-box"></div>
+  <div id="toast" class="toast-root"></div>
 </div>
+
 <script src="script.js"></script>
 </body>
-                                                                                                                                                             </html>
+  </html>
