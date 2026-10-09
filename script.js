@@ -1,10 +1,10 @@
 (() => {
   'use strict';
 
-  // ══════════════════ CONSTANTS ══════════════════
-  const USERS_KEY   = 'yourself_v6_users';
-  const SESSION_KEY = 'yourself_v6_session';
-  const PREF_KEY    = 'yourself_v6_pref';
+  // ═══════════ CONSTANTS ═══════════
+  const USERS_KEY   = 'yourself_v7_users';
+  const SESSION_KEY = 'yourself_v7_session';
+  const PREF_KEY    = 'yourself_v7_pref';
 
   const DEVS = [
     { email:'hoang@gmail.com',  pass:'Hoang123' },
@@ -14,7 +14,7 @@
   const $  = id => document.getElementById(id);
   const $$ = s  => [...document.querySelectorAll(s)];
 
-  // ══════════════════ HELPERS ══════════════════
+  // ═══════════ HELPERS ═══════════
   const uid     = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
   const emailOf = x => String(x||'').trim().toLowerCase();
   const dayKey  = (d=new Date()) => {
@@ -29,7 +29,7 @@
   const timeMins = t => { const [h,m]=String(t||'00:00').split(':').map(Number); return (h||0)*60+(m||0); };
   const hoursBetween = (a,b) => { let x=timeMins(a), y=timeMins(b); if(y<x) y+=1440; return (y-x)/60; };
 
-  // ══════════════════ STORAGE ══════════════════
+  // ═══════════ STORAGE ═══════════
   const loadUsers    = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY)||'[]'); } catch { return []; } };
   const saveUsers    = u  => localStorage.setItem(USERS_KEY, JSON.stringify(u));
   const getSession   = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); } catch { return null; } };
@@ -38,7 +38,7 @@
   const getPref      = () => { try { return JSON.parse(localStorage.getItem(PREF_KEY)||'{}'); } catch { return {}; } };
   const setPref      = p  => localStorage.setItem(PREF_KEY, JSON.stringify(p));
 
-  // ══════════════════ STATE ══════════════════
+  // ═══════════ STATE ═══════════
   const S = {
     user: null,
     page: 'dashboard',
@@ -53,7 +53,7 @@
     wizard: 1
   };
 
-  // ══════════════════ DEFAULTS ══════════════════
+  // ═══════════ DEFAULTS ═══════════
   const defaultProfile = () => ({
     job:'', salaryType:'monthly', salary:0, workDays:5,
     workStart:'08:30', workEnd:'17:00', offDays:'الجمعة، السبت',
@@ -114,7 +114,7 @@
     saveUsers(list);
   }
 
-  // ══════════════════ WORK LOGIC ══════════════════
+  // ═══════════ WORK LOGIC ═══════════
   const offMap = {
     'الأحد':0,'الاحد':0,'sunday':0,
     'الاثنين':1,'الإثنين':1,'monday':1,
@@ -198,7 +198,7 @@
     return sched ? Math.min(100, Math.round(elapsed/sched*100)) : 0;
   }
 
-  // ══════════════════ UI ══════════════════
+  // ═══════════ UI ═══════════
   function toast(text){
     const el = document.createElement('div');
     el.className = 'toast';
@@ -235,18 +235,21 @@
   }
   function setTheme(name){
     document.documentElement.className = '';
-    if(name && name !== 'mint') document.documentElement.classList.add('theme-' + name);
+    if(name && name !== 'royal') document.documentElement.classList.add('theme-' + name);
     const p = getPref(); p.theme = name; setPref(p);
     $$('.theme-tile').forEach(b => b.classList.toggle('active', b.dataset.theme === name));
   }
 
-  // ══════════════════ AUTH ══════════════════
+  // ═══════════ AUTH ═══════════
   function switchAuth(mode){
     $$('.auth-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-    $('.auth-tab-slider').classList.toggle('right', mode === 'register');
+    /* ✅ FIX: استخدام querySelector للـ class وليس getElementById */
+    const slider = document.querySelector('.auth-tab-slider');
+    if(slider) slider.classList.toggle('right', mode === 'register');
     $('loginForm').classList.toggle('hidden', mode !== 'login');
     $('registerForm').classList.toggle('hidden', mode !== 'register');
     if(mode === 'register') setWizard(1);
+    showMsg('loginMsg',''); showMsg('registerMsg','');
   }
   function togglePass(id, btn){
     const el = $(id);
@@ -277,7 +280,6 @@
   }
   function wizardNext(){
     const step = S.wizard;
-    // validate current step
     if(step === 1){
       const name = $('regName').value.trim();
       const email = emailOf($('regEmail').value);
@@ -380,7 +382,7 @@
     }, 1000);
   }
 
-  // ══════════════════ NAV ══════════════════
+  // ═══════════ NAV ═══════════
   function go(page){
     if(!S.user) return;
     S.page = page;
@@ -394,13 +396,11 @@
     if(page === 'diet')      renderDiet();
     if(page === 'health')    renderHealth();
     if(page === 'settings')  renderSettings();
-    closeSidebar();
+    $('sidebar').classList.remove('open');
   }
-  function openSidebar(){ $('sidebar').classList.add('open'); }
-  function closeSidebar(){ $('sidebar').classList.remove('open'); }
   function toggleSidebar(){ $('sidebar').classList.toggle('open'); }
 
-  // ══════════════════ RENDER ══════════════════
+  // ═══════════ RENDER ═══════════
   function renderTop(){
     const name = S.user.name || 'صديقي';
     $('topName').textContent = name;
@@ -416,7 +416,7 @@
     renderExercise(); renderDiet(); renderHealth(); renderSettings();
   }
 
-  // ── DASHBOARD ──
+  // ─── DASHBOARD ───
   function fmtDur(ms){
     const t = Math.max(0, Math.floor(ms/1000));
     const h = Math.floor(t/3600), m = Math.floor((t%3600)/60), s = t%60;
@@ -447,10 +447,8 @@
     $('timer').textContent      = fmtDur(snap.elapsedMs);
     $('clockEarn').textContent  = fmtMoney(h * rate);
 
-    // clock ring progress (full = 8h)
     const pct = Math.min(1, h / 8);
-    const dash = 327 - (327 * pct);
-    $('clockRing').style.strokeDashoffset = dash;
+    $('clockRing').style.strokeDashoffset = 327 - (327 * pct);
 
     $('sideState').textContent = snap.mode === 'off' ? 'إجازة' : snap.state;
     $('sideMeta').textContent  = snap.meta;
@@ -506,7 +504,7 @@
     toast('تم حفظ الجلسة.');
   }
 
-  // ── WORK ──
+  // ─── WORK ───
   function renderWork(){
     if(!S.user) return;
     const p = S.user.profile;
@@ -536,7 +534,7 @@
         <td>${x.kind === 'deduction' ? '-' : '+'}${fmtNum(x.amount)} EGP</td>
         <td>${shortAr(new Date(x.createdAt))}</td>
         <td><button class="table-action" onclick="Yourself.removeMoney('${x.id}')">حذف</button></td>
-      </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:24px">لا توجد عمليات</td></tr>';
+      </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:28px">لا توجد عمليات</td></tr>';
   }
   function removeMoney(id){
     persistUser({ finance: S.user.finance.filter(x => x.id !== id) });
@@ -597,7 +595,7 @@
     toast('تم التحديث.');
   }
 
-  // ── PLANNER ──
+  // ─── PLANNER ───
   function renderPlanner(){
     if(!S.user) return;
     const d = S.plannerDate;
@@ -682,7 +680,7 @@
     renderFocus();
   }
 
-  // ── NOTES ──
+  // ─── NOTES ───
   const noteCatLabel = c => ({ idea:'فكرة', work:'عمل', finance:'مال', health:'صحة', personal:'شخصية' }[c] || c);
   function renderNotes(){
     if(!S.user) return;
@@ -707,7 +705,7 @@
             <button onclick="Yourself.removeNote('${n.id}')">×</button>
           </div>
         </div>
-      </article>`).join('') : '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--ink-3);padding:40px"><b style="font-size:15px">لا توجد ملاحظات</b><p style="margin-top:6px;font-size:12px">اكتب أول ملاحظة للبدء.</p></div>';
+      </article>`).join('') : '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--ink-3);padding:48px"><b style="font-size:16px;font-family:var(--f-serif)">لا توجد ملاحظات</b><p style="margin-top:8px;font-size:12.5px">اكتب أول ملاحظة للبدء.</p></div>';
   }
   function openNoteDialog(note=null){
     const n = note || { title:'', content:'', category:'idea' };
@@ -755,7 +753,7 @@
     toast('تم الحذف.');
   }
 
-  // ── EXERCISE ──
+  // ─── EXERCISE ───
   function renderExercise(){
     if(!S.user) return;
     const now = new Date();
@@ -835,7 +833,7 @@
     toast('تم الحذف.');
   }
 
-  // ── DIET ──
+  // ─── DIET ───
   function renderDiet(){
     if(!S.user) return;
     const today = dayKey();
@@ -855,7 +853,7 @@
         <div class="meal-info">
           <b>${esc(m.name)}</b>
           <small>${esc(m.type || 'وجبة')} · ${m.protein || 0}g بروتين</small>
-          ${m.notes ? `<p style="font-size:11.5px;color:var(--ink-3);margin-top:4px;line-height:1.6">${esc(m.notes)}</p>` : ''}
+          ${m.notes ? `<p style="font-size:11.5px;color:var(--ink-3);margin-top:6px;line-height:1.7">${esc(m.notes)}</p>` : ''}
           <button class="wo-del" onclick="Yourself.removeMeal('${m.id}')">حذف</button>
         </div>
         <span class="meal-kcal">${m.kcal || 0} kcal</span>
@@ -926,7 +924,7 @@
     toast('تم تصفير الماء.');
   }
 
-  // ── HEALTH ──
+  // ─── HEALTH ───
   const plans = {
     balanced: [['الصباح','ماء + بداية هادئة + ترتيب الأولويات'],['العمل','فواصل قصيرة للحركة'],['بعد العمل','وجبة متنوعة + نشاط خفيف'],['المساء','تهدئة ونوم منتظم']],
     training: [['الأسبوع','3 جلسات نشاط مناسب'],['يوميًا','مشي أو حركة خفيفة'],['الاستشفاء','إحماء وتهدئة'],['المساء','نوم منتظم']],
@@ -989,7 +987,7 @@
     toast('تم الحفظ.');
   }
 
-  // ── SETTINGS ──
+  // ─── SETTINGS ───
   function renderSettings(){
     if(!S.user) return;
     const p = S.user.profile;
@@ -1032,7 +1030,7 @@
       </div>`);
   }
 
-  // ── DEV ──
+  // ─── DEV ───
   function bindSecret(){
     const el = $('brandSecret');
     if(!el) return;
@@ -1089,7 +1087,7 @@
     openDialog('بيانات المستخدم', '', `
       <div class="empty" style="text-align:right;border-style:solid;background:var(--surface-2)">
         <b>${esc(u.name)}</b>
-        <span style="display:block;margin-top:6px;line-height:2">
+        <span style="display:block;margin-top:8px;line-height:2">
           البريد: ${esc(u.email)}<br>
           الوظيفة: ${esc(u.profile?.job || '—')}<br>
           الدخل: ${fmtMoney(u.profile?.salary || 0)}<br>
@@ -1104,7 +1102,7 @@
     toast('تم الحذف.');
   }
 
-  // ── GLOBAL SEARCH ──
+  // ─── GLOBAL SEARCH ───
   function globalSearch(q){
     q = q.trim().toLowerCase();
     if(!q) return;
@@ -1119,14 +1117,14 @@
     openDialog('نتائج البحث', `${results.length} نتيجة`, `
       <div style="display:flex;flex-direction:column;gap:8px">
         ${results.slice(0,20).map(r => `
-          <button onclick="Yourself.go('${r.page}');Yourself.closeDialog()" style="text-align:right;padding:12px;background:var(--surface-2);border-radius:12px;border:1px solid var(--line)">
+          <button onclick="Yourself.go('${r.page}');Yourself.closeDialog()" style="text-align:right;padding:14px;background:var(--surface-2);border-radius:14px;border:1px solid var(--line)">
             <small style="color:var(--ink-3);font-size:10.5px">${r.type}</small>
-            <div style="font-weight:700;font-size:13px;margin-top:2px">${esc(r.text)}</div>
+            <div style="font-weight:600;font-size:13px;margin-top:3px">${esc(r.text)}</div>
           </button>`).join('')}
       </div>`);
   }
 
-  // ══════════════════ BINDINGS ══════════════════
+  // ═══════════ BINDINGS ═══════════
   function bindAuth(){
     $$('.auth-tab').forEach(b => b.addEventListener('click', () => switchAuth(b.dataset.mode)));
     $$('[data-pass]').forEach(b => b.addEventListener('click', () => togglePass(b.dataset.pass, b)));
@@ -1135,12 +1133,27 @@
     $('registerForm').addEventListener('submit', register);
     $('wNext').addEventListener('click', wizardNext);
     $('wPrev').addEventListener('click', wizardPrev);
+    // رابط "إنشاء حساب" أسفل نموذج الدخول
+    const toReg = $('toRegister');
+    if(toReg) toReg.addEventListener('click', () => switchAuth('register'));
+    // عند الضغط Enter في الخطوات 1-3 → التالي بدل الإرسال
+    $('registerForm').addEventListener('keydown', e => {
+      if(e.key === 'Enter' && S.wizard < 4){
+        e.preventDefault();
+        wizardNext();
+      }
+    });
   }
 
   function bindApp(){
-    // navigation
-    $$('.sb-item, .bn-item, [data-page]').forEach(b => {
+    // navigation (sidebar + bottom + links)
+    $$('.sb-item, .bn-item').forEach(b => {
       if(b.dataset.page) b.addEventListener('click', () => go(b.dataset.page));
+    });
+    $$('[data-page]').forEach(b => {
+      if(!b.classList.contains('sb-item') && !b.classList.contains('bn-item')){
+        b.addEventListener('click', () => go(b.dataset.page));
+      }
     });
     $('menuBtn').addEventListener('click', toggleSidebar);
     document.addEventListener('click', e => {
@@ -1216,16 +1229,16 @@
   }
 
   function cycleTheme(){
-    const order = ['mint','night','sand','rose','ocean','forest'];
-    const cur = getPref().theme || 'mint';
+    const order = ['royal','ivory','night','mint','ocean','forest'];
+    const cur = getPref().theme || 'royal';
     const next = order[(order.indexOf(cur) + 1) % order.length];
     setTheme(next);
     toast('الثيم: ' + next);
   }
 
-  // ══════════════════ BOOT ══════════════════
+  // ═══════════ BOOT ═══════════
   function boot(){
-    setTheme(getPref().theme || 'mint');
+    setTheme(getPref().theme || 'royal');
     bindAuth();
     bindApp();
     bindSecret();
@@ -1236,7 +1249,7 @@
     }
   }
 
-  // ══════════════════ EXPOSE ══════════════════
+  // ═══════════ EXPOSE ═══════════
   window.Yourself = {
     go, closeDialog,
     saveMoney, removeMoney, saveWork,
