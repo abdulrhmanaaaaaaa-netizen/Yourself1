@@ -1,10 +1,10 @@
 (() => {
   'use strict';
 
-  // ============ CONSTANTS ============
-  const USERS_KEY   = 'yourself_v5_users';
-  const SESSION_KEY = 'yourself_v5_session';
-  const PREF_KEY    = 'yourself_v5_pref';
+  // ══════════════════ CONSTANTS ══════════════════
+  const USERS_KEY   = 'yourself_v6_users';
+  const SESSION_KEY = 'yourself_v6_session';
+  const PREF_KEY    = 'yourself_v6_pref';
 
   const DEVS = [
     { email:'hoang@gmail.com',  pass:'Hoang123' },
@@ -14,9 +14,9 @@
   const $  = id => document.getElementById(id);
   const $$ = s  => [...document.querySelectorAll(s)];
 
-  // ============ HELPERS ============
-  const uid     = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  const emailOf = x  => String(x||'').trim().toLowerCase();
+  // ══════════════════ HELPERS ══════════════════
+  const uid     = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  const emailOf = x => String(x||'').trim().toLowerCase();
   const dayKey  = (d=new Date()) => {
     const x = new Date(d);
     return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
@@ -29,16 +29,16 @@
   const timeMins = t => { const [h,m]=String(t||'00:00').split(':').map(Number); return (h||0)*60+(m||0); };
   const hoursBetween = (a,b) => { let x=timeMins(a), y=timeMins(b); if(y<x) y+=1440; return (y-x)/60; };
 
-  // ============ STORAGE ============
-  const loadUsers   = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY)||'[]'); } catch { return []; } };
-  const saveUsers   = u  => localStorage.setItem(USERS_KEY, JSON.stringify(u));
-  const getSession  = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); } catch { return null; } };
-  const setSession  = e  => localStorage.setItem(SESSION_KEY, JSON.stringify({ email:e, at:Date.now() }));
-  const clearSession= () => localStorage.removeItem(SESSION_KEY);
-  const getPref     = () => { try { return JSON.parse(localStorage.getItem(PREF_KEY)||'{}'); } catch { return {}; } };
-  const setPref     = p  => localStorage.setItem(PREF_KEY, JSON.stringify(p));
+  // ══════════════════ STORAGE ══════════════════
+  const loadUsers    = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY)||'[]'); } catch { return []; } };
+  const saveUsers    = u  => localStorage.setItem(USERS_KEY, JSON.stringify(u));
+  const getSession   = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); } catch { return null; } };
+  const setSession   = e  => localStorage.setItem(SESSION_KEY, JSON.stringify({ email:e, at:Date.now() }));
+  const clearSession = () => localStorage.removeItem(SESSION_KEY);
+  const getPref      = () => { try { return JSON.parse(localStorage.getItem(PREF_KEY)||'{}'); } catch { return {}; } };
+  const setPref      = p  => localStorage.setItem(PREF_KEY, JSON.stringify(p));
 
-  // ============ STATE ============
+  // ══════════════════ STATE ══════════════════
   const S = {
     user: null,
     page: 'dashboard',
@@ -48,21 +48,20 @@
     exFilter: 'all',
     plannerDate: new Date(),
     focus: { seconds:1500, running:false, interval:null },
-    tickInterval: null,
-    secretClicks: 0,
-    secretTimer: null
+    tick: null,
+    secret: { count:0, timer:null },
+    wizard: 1
   };
 
-  // ============ DEFAULTS ============
+  // ══════════════════ DEFAULTS ══════════════════
   const defaultProfile = () => ({
     job:'', salaryType:'monthly', salary:0, workDays:5,
     workStart:'08:30', workEnd:'17:00', offDays:'الجمعة، السبت',
     wake:'07:00', sleep:'23:00', goWork:'08:00', backWork:'17:30',
     goal:'تنظيم الوقت', activity:'moderate',
     age:'', weight:'', height:'',
-    calorieGoal: 2000, waterGoal: 8
+    calorieGoal:2000, waterGoal:8
   });
-
   const defaultHabits = () => {
     const d = dayKey();
     return [
@@ -72,22 +71,18 @@
       { id:'sleep', title:'نوم منتظم',    meta:'قرب موعد نومك',      done:false, date:d }
     ];
   };
-
-  function defaultUser(o={}){
-    return {
-      id: uid(),
-      name:'', email:'', password:'',
-      createdAt: new Date().toISOString(),
-      profile: defaultProfile(),
-      finance: [], notes: [], planner: [],
-      workLogs: [], workControl: null,
-      habits: defaultHabits(),
-      healthPlan: 'balanced',
-      workouts: [], meals: [], waterLog: {},
-      ...o
-    };
-  }
-
+  const defaultUser = (o={}) => ({
+    id: uid(),
+    name:'', email:'', password:'',
+    createdAt: new Date().toISOString(),
+    profile: defaultProfile(),
+    finance: [], notes: [], planner: [],
+    workLogs: [], workControl: null,
+    habits: defaultHabits(),
+    healthPlan: 'balanced',
+    workouts: [], meals: [], waterLog: {},
+    ...o
+  });
   function normalizeUser(u){
     if(!u) return null;
     const base = defaultUser();
@@ -99,10 +94,10 @@
     return {
       ...base, ...u,
       profile: { ...base.profile, ...(u.profile||{}) },
-      finance:   Array.isArray(u.finance)   ? u.finance   : [],
-      notes:     Array.isArray(u.notes)     ? u.notes     : [],
-      planner:   Array.isArray(u.planner)   ? u.planner   : [],
-      workLogs:  Array.isArray(u.workLogs)  ? u.workLogs  : [],
+      finance:   Array.isArray(u.finance)  ? u.finance  : [],
+      notes:     Array.isArray(u.notes)    ? u.notes    : [],
+      planner:   Array.isArray(u.planner)  ? u.planner  : [],
+      workLogs:  Array.isArray(u.workLogs) ? u.workLogs : [],
       workControl: u.workControl || null,
       habits,
       workouts: Array.isArray(u.workouts) ? u.workouts : [],
@@ -110,7 +105,6 @@
       waterLog: u.waterLog || {}
     };
   }
-
   function persistUser(patch){
     if(!S.user) return;
     S.user = normalizeUser({ ...S.user, ...patch });
@@ -120,7 +114,7 @@
     saveUsers(list);
   }
 
-  // ============ WORK LOGIC ============
+  // ══════════════════ WORK LOGIC ══════════════════
   const offMap = {
     'الأحد':0,'الاحد':0,'sunday':0,
     'الاثنين':1,'الإثنين':1,'monday':1,
@@ -175,27 +169,24 @@
       const stop = c.stoppedAt ? new Date(c.stoppedAt) : now;
       const end = stop < schedEnd ? stop : schedEnd;
       return {
-        state: c.stoppedAt ? 'انتهت الجلسة'
-             : (now >= schedEnd ? 'انتهى وقت العمل' : 'عمل يدوي جارٍ'),
-        meta: c.stoppedAt ? 'تم حفظ الجلسة اليدوية' : 'الجلسة محفوظة',
+        state: c.stoppedAt ? 'انتهت الجلسة' : (now >= schedEnd ? 'انتهى وقت العمل' : 'عمل يدوي جارٍ'),
+        meta: c.stoppedAt ? 'تم حفظ الجلسة' : 'الجلسة محفوظة',
         elapsedMs: Math.max(0, end - start),
         mode: 'manual'
       };
     }
-    if(!isWorkday(now)){
-      return { state:'إجازة اليوم', meta:'لا يوجد احتساب تلقائي', elapsedMs:0, mode:'off' };
-    }
+    if(!isWorkday(now)) return { state:'إجازة اليوم', meta:'لا يوجد احتساب', elapsedMs:0, mode:'off' };
     const { start, end } = workWindow(now);
-    if(now < start) return { state:'قبل بداية العمل', meta:`يبدأ تلقائيًا ${S.user.profile.workStart}`, elapsedMs:0, mode:'auto' };
-    if(now >= end)  return { state:'انتهى وقت العمل', meta:`انتهى تلقائيًا ${S.user.profile.workEnd}`, elapsedMs: end - start, mode:'auto' };
-    return { state:'يعمل تلقائيًا', meta:`يتوقف تلقائيًا ${S.user.profile.workEnd}`, elapsedMs: now - start, mode:'auto' };
+    if(now < start) return { state:'قبل بداية العمل', meta:`يبدأ ${S.user.profile.workStart}`, elapsedMs:0, mode:'auto' };
+    if(now >= end)  return { state:'انتهى وقت العمل', meta:`انتهى ${S.user.profile.workEnd}`, elapsedMs:end-start, mode:'auto' };
+    return { state:'يعمل تلقائيًا', meta:`يتوقف ${S.user.profile.workEnd}`, elapsedMs:now-start, mode:'auto' };
   }
   function monthlyProgress(){
     if(!S.user) return 0;
     const now = new Date();
     const first = new Date(now.getFullYear(), now.getMonth(), 1);
     const last  = new Date(now.getFullYear(), now.getMonth()+1, 0);
-    let sched = 0, elapsed = 0;
+    let sched=0, elapsed=0;
     for(let d = new Date(first); d <= last; d.setDate(d.getDate()+1)){
       const date = new Date(d);
       if(!isWorkday(date)) continue;
@@ -204,10 +195,10 @@
       if(dayKey(date) < dayKey(now)) elapsed += end - start;
       else if(dayKey(date) === dayKey(now)) elapsed += Math.max(0, Math.min(now, end) - start);
     }
-    return sched ? Math.min(100, Math.round(elapsed / sched * 100)) : 0;
+    return sched ? Math.min(100, Math.round(elapsed/sched*100)) : 0;
   }
 
-  // ============ UI HELPERS ============
+  // ══════════════════ UI ══════════════════
   function toast(text){
     const el = document.createElement('div');
     el.className = 'toast';
@@ -219,7 +210,7 @@
     const el = $(id);
     if(!el) return;
     el.textContent = text;
-    el.className = 'form-message ' + type;
+    el.className = 'msg ' + type;
   }
   function openDialog(title, desc, body){
     const m = $('modal');
@@ -228,13 +219,13 @@
       <div class="dialog">
         <div class="dialog-head">
           <div>
-            <span class="kicker">YOURSELF</span>
+            <span class="eyebrow">YOURSELF</span>
             <h3>${esc(title)}</h3>
-            <p>${esc(desc)}</p>
+            ${desc ? `<p>${esc(desc)}</p>` : ''}
           </div>
           <button class="close" onclick="Yourself.closeDialog()">×</button>
         </div>
-        <div class="dialog-body">${body}</div>
+        <div>${body}</div>
       </div>`;
   }
   function closeDialog(){
@@ -246,14 +237,16 @@
     document.documentElement.className = '';
     if(name && name !== 'mint') document.documentElement.classList.add('theme-' + name);
     const p = getPref(); p.theme = name; setPref(p);
-    $$('.theme').forEach(b => b.classList.toggle('active', b.dataset.theme === name));
+    $$('.theme-tile').forEach(b => b.classList.toggle('active', b.dataset.theme === name));
   }
 
-  // ============ AUTH ============
+  // ══════════════════ AUTH ══════════════════
   function switchAuth(mode){
-    $$('.mode-tab').forEach(b => b.classList.toggle('active', b.dataset.auth === mode));
+    $$('.auth-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    $('.auth-tab-slider').classList.toggle('right', mode === 'register');
     $('loginForm').classList.toggle('hidden', mode !== 'login');
     $('registerForm').classList.toggle('hidden', mode !== 'register');
+    if(mode === 'register') setWizard(1);
   }
   function togglePass(id, btn){
     const el = $(id);
@@ -261,37 +254,79 @@
     btn.textContent = el.type === 'password' ? 'إظهار' : 'إخفاء';
   }
   function strength(){
-    const v = $('regPassword').value;
+    const v = $('regPass').value;
     const t = [v.length>=8, /[A-Za-zأ-ي]/.test(v), /\d/.test(v), /[^A-Za-z0-9أ-ي]/.test(v)];
     const score = t.filter(Boolean).length;
-    $$('.password-strength span').forEach((x,i) => x.classList.toggle('on', i < score));
-    const s = document.querySelector('.password-strength small');
+    $$('.strength span').forEach((x,i) => x.classList.toggle('on', i < score));
+    const s = document.querySelector('.strength small');
     if(s) s.textContent = 'قوة كلمة المرور · ' +
       (score < 2 ? 'ضعيفة' : score === 2 ? 'متوسطة' : score === 3 ? 'جيدة' : 'قوية');
+  }
+  function setWizard(step){
+    S.wizard = step;
+    $$('.wizard-pane').forEach(p => p.classList.toggle('active', +p.dataset.pane === step));
+    $$('.w-step').forEach(s => {
+      const n = +s.dataset.step;
+      s.classList.toggle('active', n === step);
+      s.classList.toggle('done', n < step);
+    });
+    $('wizardBar').style.width = (step * 25) + '%';
+    $('wPrev').disabled = step === 1;
+    $('wNext').classList.toggle('hidden', step === 4);
+    $('wFinish').classList.toggle('hidden', step !== 4);
+  }
+  function wizardNext(){
+    const step = S.wizard;
+    // validate current step
+    if(step === 1){
+      const name = $('regName').value.trim();
+      const email = emailOf($('regEmail').value);
+      const p = $('regPass').value;
+      const p2 = $('regPass2').value;
+      if(!name) return showMsg('registerMsg','اكتب اسمك.');
+      if(!email || !/\S+@\S+\.\S+/.test(email)) return showMsg('registerMsg','بريد غير صالح.');
+      if(p.length < 8) return showMsg('registerMsg','كلمة المرور 8 أحرف على الأقل.');
+      if(p !== p2) return showMsg('registerMsg','تأكيد كلمة المرور غير مطابق.');
+      if(loadUsers().some(x => emailOf(x.email) === email) || DEVS.some(x => x.email === email))
+        return showMsg('registerMsg','البريد مستخدم بالفعل.');
+      showMsg('registerMsg','');
+    }
+    if(step === 2){
+      const job = $('regJob').value.trim();
+      const sal = Number($('regSalary').value);
+      if(!job) return showMsg('registerMsg','اكتب الوظيفة.');
+      if(!sal || sal <= 0) return showMsg('registerMsg','أدخل الدخل.');
+      showMsg('registerMsg','');
+    }
+    setWizard(Math.min(4, step + 1));
+  }
+  function wizardPrev(){
+    if(S.wizard > 1) setWizard(S.wizard - 1);
   }
   function login(e){
     e.preventDefault();
     const email = emailOf($('loginEmail').value);
-    const pass  = $('loginPassword').value;
-    if(!email || !pass) return showMsg('loginMessage', 'أدخل البريد وكلمة المرور.');
+    const pass = $('loginPassword').value;
+    if(!email || !pass) return showMsg('loginMsg','أدخل البريد وكلمة المرور.');
     if(DEVS.some(d => d.email === email && d.pass === pass)) return openDevCenter();
     const u = loadUsers().find(x => emailOf(x.email) === email && x.password === pass);
-    if(!u) return showMsg('loginMessage', 'البريد أو كلمة المرور غير صحيحة.');
+    if(!u) return showMsg('loginMsg','بيانات الدخول غير صحيحة.');
     setSession(u.email);
     enterApp(u);
   }
   function register(e){
     e.preventDefault();
-    const pwd = $('regPassword').value;
+    const p = $('regPass').value;
+    const act = document.querySelector('input[name="act"]:checked')?.value || 'moderate';
     const data = defaultUser({
       name: $('regName').value.trim(),
       email: emailOf($('regEmail').value),
-      password: pwd,
+      password: p,
       profile: {
         job: $('regJob').value.trim(),
         salaryType: $('regSalaryType').value,
         salary: Number($('regSalary').value) || 0,
-        workDays: Number($('regWorkDays').value) || 5,
+        workDays: Number($('regDays').value) || 5,
         workStart: $('regStart').value || '08:30',
         workEnd:   $('regEnd').value   || '17:00',
         offDays:   $('regOff').value.trim() || 'الجمعة، السبت',
@@ -300,30 +335,22 @@
         goWork:    $('regGo').value  || '08:00',
         backWork:  $('regBack').value || '17:30',
         goal:      $('regGoal').value,
-        activity:  $('regActivity').value,
+        activity:  act,
         age:       $('regAge').value,
         weight:    $('regWeight').value,
-        height:    $('regHeight').value
+        height:    $('regHeight').value,
+        calorieGoal: Number($('regCalGoal').value) || 2000,
+        waterGoal:   Number($('regWaterGoal').value) || 8
       },
       habits: defaultHabits()
     });
-    if(!data.name) return showMsg('registerMessage', 'اكتب اسمك.');
-    if(!data.email || !/\S+@\S+\.\S+/.test(data.email)) return showMsg('registerMessage', 'بريد غير صالح.');
-    if(pwd.length < 8) return showMsg('registerMessage', 'كلمة المرور 8 أحرف على الأقل.');
-    if(pwd !== $('regPassword2').value) return showMsg('registerMessage', 'تأكيد كلمة المرور غير مطابق.');
-    if(!data.profile.job) return showMsg('registerMessage', 'اكتب الوظيفة.');
-    if(data.profile.salary <= 0) return showMsg('registerMessage', 'أدخل الدخل.');
-    if(loadUsers().some(x => emailOf(x.email) === data.email) || DEVS.some(x => x.email === data.email))
-      return showMsg('registerMessage', 'البريد مستخدم.');
-
     const d = dayKey();
     data.planner = [
-      { id: uid(), date:d, time:data.profile.goWork,   title:'الذهاب للعمل', category:'روتين',  done:false },
-      { id: uid(), date:d, time:data.profile.workStart,title:'بداية العمل', category:'عمل',    done:false },
-      { id: uid(), date:d, time:'13:00',               title:'فاصل وغداء', category:'استراحة',done:false },
-      { id: uid(), date:d, time:data.profile.workEnd,  title:'إغلاق العمل', category:'عمل',    done:false }
+      { id: uid(), date:d, time:data.profile.goWork,    title:'الذهاب للعمل', category:'روتين',   done:false },
+      { id: uid(), date:d, time:data.profile.workStart, title:'بداية العمل',  category:'عمل',     done:false },
+      { id: uid(), date:d, time:'13:00',                title:'فاصل وغداء',   category:'استراحة', done:false },
+      { id: uid(), date:d, time:data.profile.workEnd,   title:'إغلاق العمل',  category:'عمل',     done:false }
     ];
-
     const list = loadUsers();
     list.push(data);
     saveUsers(list);
@@ -341,24 +368,24 @@
   }
   function logout(){
     clearSession();
-    if(S.tickInterval) clearInterval(S.tickInterval);
+    if(S.tick) clearInterval(S.tick);
     S.user = null;
     location.reload();
   }
   function startTick(){
-    if(S.tickInterval) clearInterval(S.tickInterval);
-    S.tickInterval = setInterval(() => {
+    if(S.tick) clearInterval(S.tick);
+    S.tick = setInterval(() => {
       if(!S.user) return;
       if(S.page === 'dashboard') renderDashboard();
     }, 1000);
   }
 
-  // ============ NAV ============
+  // ══════════════════ NAV ══════════════════
   function go(page){
     if(!S.user) return;
     S.page = page;
-    $$('.page').forEach(p => p.classList.toggle('active-page', p.id === 'page-' + page));
-    $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+    $$('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
+    $$('.sb-item, .bn-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
     if(page === 'dashboard') renderDashboard();
     if(page === 'work')      renderWork();
     if(page === 'planner')   renderPlanner();
@@ -367,15 +394,21 @@
     if(page === 'diet')      renderDiet();
     if(page === 'health')    renderHealth();
     if(page === 'settings')  renderSettings();
+    closeSidebar();
   }
+  function openSidebar(){ $('sidebar').classList.add('open'); }
+  function closeSidebar(){ $('sidebar').classList.remove('open'); }
+  function toggleSidebar(){ $('sidebar').classList.toggle('open'); }
 
-  // ============ RENDER ============
+  // ══════════════════ RENDER ══════════════════
   function renderTop(){
     const name = S.user.name || 'صديقي';
-    $('topName').textContent  = name;
-    $('topJob').textContent   = S.user.profile.job || 'مساحتك';
-    $('heroName').textContent = name.split(' ')[0];
-    $('avatar').textContent   = name.trim().charAt(0).toUpperCase() || 'Y';
+    $('topName').textContent = name;
+    $('topJob').textContent  = S.user.profile.job || 'مساحتك';
+    $('heroName').textContent= name.split(' ')[0];
+    $('avatar').textContent  = name.trim().charAt(0).toUpperCase() || 'Y';
+    $('sbName').textContent  = name.split(' ')[0];
+    $('tbDate').textContent  = new Intl.DateTimeFormat('ar-EG',{weekday:'long', day:'numeric', month:'short'}).format(new Date());
   }
   function renderAll(){
     renderTop();
@@ -383,8 +416,8 @@
     renderExercise(); renderDiet(); renderHealth(); renderSettings();
   }
 
-  // ---- DASHBOARD ----
-  function fmtDuration(ms){
+  // ── DASHBOARD ──
+  function fmtDur(ms){
     const t = Math.max(0, Math.floor(ms/1000));
     const h = Math.floor(t/3600), m = Math.floor((t%3600)/60), s = t%60;
     return [h,m,s].map(x => String(x).padStart(2,'0')).join(':');
@@ -401,19 +434,26 @@
     const rate = hourlyRate();
     const h = snap.elapsedMs / 3600000;
 
-    $('hourRate').textContent       = fmtNum(rate);
-    $('todayEarned').textContent    = fmtNum(h * rate);
-    $('todayHours').textContent     = h.toFixed(2) + 'h';
-    $('todayHoursMeta').textContent = snap.state;
-    $('todayTasks').textContent     = S.user.planner.filter(x => x.date === dayKey()).length;
+    $('kHourRate').textContent       = fmtNum(rate);
+    $('kTodayEarned').textContent    = fmtNum(h * rate);
+    $('kTodayEarnedMeta').textContent= snap.state;
+    $('kTodayHours').textContent     = h.toFixed(2) + 'h';
+    $('kTodayHoursMeta').textContent = snap.meta;
+    $('kTodayTasks').textContent     = S.user.planner.filter(x => x.date === dayKey()).length;
 
     $('clockBadge').textContent = snap.state;
     $('clockState').textContent = snap.state;
     $('clockMeta').textContent  = snap.meta;
-    $('timer').textContent      = fmtDuration(snap.elapsedMs);
+    $('timer').textContent      = fmtDur(snap.elapsedMs);
     $('clockEarn').textContent  = fmtMoney(h * rate);
-    $('sideState').textContent  = snap.mode === 'off' ? 'إجازة' : snap.state;
-    $('sideMeta').textContent   = snap.meta;
+
+    // clock ring progress (full = 8h)
+    const pct = Math.min(1, h / 8);
+    const dash = 327 - (327 * pct);
+    $('clockRing').style.strokeDashoffset = dash;
+
+    $('sideState').textContent = snap.mode === 'off' ? 'إجازة' : snap.state;
+    $('sideMeta').textContent  = snap.meta;
 
     const active = S.user.workControl?.date === dayKey()
                 && S.user.workControl?.startedAt
@@ -425,26 +465,30 @@
     const items = S.user.finance || [];
     const ded = items.filter(x => x.kind === 'deduction').reduce((a,x) => a + Number(x.amount||0), 0);
     const ext = items.filter(x => x.kind === 'extra').reduce((a,x) => a + Number(x.amount||0), 0);
-    $('baseMoney').textContent   = fmtNum(Number(p.salary) || 0);
+    const base = Number(p.salary) || 0;
+    const net = Math.max(0, base + ext - ded);
+    $('baseMoney').textContent   = fmtNum(base);
     $('deductMoney').textContent = fmtNum(ded);
     $('extraMoney').textContent  = fmtNum(ext);
-    $('netMoney').textContent    = fmtMoney(Math.max(0, (Number(p.salary)||0) + ext - ded));
+    $('netMoney').textContent    = fmtMoney(net);
+    const moneyPct = base > 0 ? Math.round((net / base) * 100) : 0;
+    $('moneyPct').textContent = Math.min(100, moneyPct) + '%';
+    $('moneyDonut').style.strokeDashoffset = 100.5 - (100.5 * Math.min(1, moneyPct/100));
 
     const today = dayKey();
-    const next = S.user.planner.filter(x => x.date === today)
-      .sort((a,b) => a.time.localeCompare(b.time)).slice(0,5);
+    const next = S.user.planner.filter(x => x.date === today).sort((a,b) => a.time.localeCompare(b.time)).slice(0,5);
     $('nextList').innerHTML = next.length ? next.map(x => `
-      <div class="timeline-item">
+      <div class="tl-item">
         <time>${esc(x.time)}</time><i></i>
-        <div><strong>${esc(x.title)}</strong><span>${esc(x.category || 'مهمة')}</span></div>
-      </div>`).join('') : '<div class="info-note"><b>يومك مفتوح</b><span>أضف مهمة من قسم تنظيم الوقت.</span></div>';
+        <div><b>${esc(x.title)}</b><span>${esc(x.category || 'مهمة')}</span></div>
+      </div>`).join('') : '<div class="empty"><b>يومك مفتوح</b><span>أضف مهمة من قسم تنظيم الوقت.</span></div>';
 
     const notes = S.user.notes.slice().sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0,3);
     $('notePreview').innerHTML = notes.length ? notes.map(n => `
-      <div class="preview-note">
+      <div class="np-item">
         <b>${esc(n.title)}</b>
         <span>${esc((n.content || '').slice(0,120))}</span>
-      </div>`).join('') : '<div class="info-note"><b>المذكرة جاهزة</b><span>اكتب أول ملاحظة.</span></div>';
+      </div>`).join('') : '<div class="empty"><b>المذكرة جاهزة</b><span>اكتب أول ملاحظة.</span></div>';
   }
   function manualStart(){
     const key = dayKey();
@@ -462,7 +506,7 @@
     toast('تم حفظ الجلسة.');
   }
 
-  // ---- WORK ----
+  // ── WORK ──
   function renderWork(){
     if(!S.user) return;
     const p = S.user.profile;
@@ -478,12 +522,12 @@
 
     const list = S.user.finance.filter(x => S.moneyFilter === 'all' || x.kind === S.moneyFilter).slice().reverse();
     $('moneyList').innerHTML = list.length ? list.slice(0,8).map(x => `
-      <div class="money-row">
+      <div class="row">
         <div><b>${esc(x.title)}</b><small>${shortAr(new Date(x.createdAt))}</small></div>
         <span class="kind ${x.kind}">${x.kind === 'deduction' ? 'خصم' : 'إضافي'}</span>
-        <button onclick="Yourself.removeMoney('${x.id}')">×</button>
+        <button class="del" onclick="Yourself.removeMoney('${x.id}')">×</button>
         <b>${x.kind === 'deduction' ? '-' : '+'}${fmtNum(x.amount)}</b>
-      </div>`).join('') : '<div class="info-note"><b>لا توجد حركات</b><span>أضف خصمًا أو إضافة.</span></div>';
+      </div>`).join('') : '<div class="empty"><b>لا توجد حركات</b><span>أضف خصمًا أو إضافة.</span></div>';
 
     $('moneyTable').innerHTML = list.length ? list.map(x => `
       <tr>
@@ -492,7 +536,7 @@
         <td>${x.kind === 'deduction' ? '-' : '+'}${fmtNum(x.amount)} EGP</td>
         <td>${shortAr(new Date(x.createdAt))}</td>
         <td><button class="table-action" onclick="Yourself.removeMoney('${x.id}')">حذف</button></td>
-      </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--muted)">لا توجد عمليات</td></tr>';
+      </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:24px">لا توجد عمليات</td></tr>';
   }
   function removeMoney(id){
     persistUser({ finance: S.user.finance.filter(x => x.id !== id) });
@@ -501,14 +545,14 @@
   }
   function openMoneyDialog(){
     openDialog('حركة مالية', 'أضف خصمًا أو مبلغًا إضافيًا.', `
-      <div class="modal-grid">
+      <div class="two">
         <label>النوع<select id="mType"><option value="deduction">خصم</option><option value="extra">إضافي</option></select></label>
         <label>المبلغ<input id="mAmount" type="number" min="0" step="0.01" placeholder="250"></label>
       </div>
       <label>الوصف<input id="mTitle" type="text" placeholder="مثال: مواصلات"></label>
       <div class="dialog-actions">
-        <button class="primary-btn" onclick="Yourself.saveMoney()">حفظ</button>
-        <button class="ghost-btn" onclick="Yourself.closeDialog()">إلغاء</button>
+        <button class="btn btn-primary" onclick="Yourself.saveMoney()">حفظ</button>
+        <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
       </div>`);
   }
   function saveMoney(){
@@ -524,7 +568,7 @@
   function openWorkDialog(){
     const p = S.user.profile;
     openDialog('بيانات العمل', 'حدّث الدخل والدوام.', `
-      <div class="modal-grid">
+      <div class="two">
         <label>الدخل<input id="wSalary" type="number" value="${p.salary}"></label>
         <label>النوع<select id="wType">
           <option value="monthly" ${p.salaryType==='monthly'?'selected':''}>شهري</option>
@@ -536,8 +580,8 @@
         <label>النهاية<input id="wEnd" type="time" value="${p.workEnd}"></label>
       </div>
       <div class="dialog-actions">
-        <button class="primary-btn" onclick="Yourself.saveWork()">حفظ</button>
-        <button class="ghost-btn" onclick="Yourself.closeDialog()">إلغاء</button>
+        <button class="btn btn-primary" onclick="Yourself.saveWork()">حفظ</button>
+        <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
       </div>`);
   }
   function saveWork(){
@@ -553,7 +597,7 @@
     toast('تم التحديث.');
   }
 
-  // ---- PLANNER ----
+  // ── PLANNER ──
   function renderPlanner(){
     if(!S.user) return;
     const d = S.plannerDate;
@@ -569,7 +613,7 @@
       html += `
         <div class="hour">
           <div class="hour-time">${hh}:00</div>
-          <div class="slot ${found.length ? '' : 'slot-empty'}">
+          <div class="slot ${found.length ? '' : 'empty'}">
             ${found.map(x => `<div class="task-chip"><span>${esc(x.title)}</span><b>${esc(x.time)}</b></div>`).join('')}
           </div>
         </div>`;
@@ -581,13 +625,13 @@
       ['الاستيقاظ', p.wake], ['الذهاب', p.goWork],
       ['العمل', `${p.workStart} → ${p.workEnd}`],
       ['الرجوع', p.backWork], ['النوم', p.sleep]
-    ].map(x => `<div class="routine-row"><span>${x[0]}</span><b>${esc(x[1] || '—')}</b></div>`).join('');
+    ].map(x => `<div class="rr-row"><span>${x[0]}</span><b>${esc(x[1] || '—')}</b></div>`).join('');
 
     renderFocus();
   }
   function openTaskDialog(){
     openDialog('مهمة جديدة', 'أضف مهمة لأي يوم.', `
-      <div class="modal-grid">
+      <div class="two">
         <label>التاريخ<input id="tDate" type="date" value="${dayKey(S.plannerDate)}"></label>
         <label>الوقت<input id="tTime" type="time" value="09:00"></label>
       </div>
@@ -597,8 +641,8 @@
         <option>صحة</option><option>شخصي</option><option>روتين</option>
       </select></label>
       <div class="dialog-actions">
-        <button class="primary-btn" onclick="Yourself.saveTask()">إضافة</button>
-        <button class="ghost-btn" onclick="Yourself.closeDialog()">إلغاء</button>
+        <button class="btn btn-primary" onclick="Yourself.saveTask()">إضافة</button>
+        <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
       </div>`);
   }
   function saveTask(){
@@ -638,7 +682,7 @@
     renderFocus();
   }
 
-  // ---- NOTES ----
+  // ── NOTES ──
   const noteCatLabel = c => ({ idea:'فكرة', work:'عمل', finance:'مال', health:'صحة', personal:'شخصية' }[c] || c);
   function renderNotes(){
     if(!S.user) return;
@@ -658,12 +702,12 @@
         <p>${esc(n.content)}</p>
         <div class="note-foot">
           <small>${shortAr(new Date(n.updatedAt))}</small>
-          <div style="display:flex;gap:6px">
+          <div class="acts">
             <button onclick="Yourself.editNote('${n.id}')">✎</button>
             <button onclick="Yourself.removeNote('${n.id}')">×</button>
           </div>
         </div>
-      </article>`).join('') : '<div class="panel" style="grid-column:1/-1;text-align:center;color:var(--muted)"><b>لا توجد ملاحظات</b></div>';
+      </article>`).join('') : '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--ink-3);padding:40px"><b style="font-size:15px">لا توجد ملاحظات</b><p style="margin-top:6px;font-size:12px">اكتب أول ملاحظة للبدء.</p></div>';
   }
   function openNoteDialog(note=null){
     const n = note || { title:'', content:'', category:'idea' };
@@ -678,8 +722,8 @@
       </select></label>
       <label>المحتوى<textarea id="nContent">${esc(n.content)}</textarea></label>
       <div class="dialog-actions">
-        <button class="primary-btn" onclick="Yourself.saveNote('${n.id||''}')">حفظ</button>
-        <button class="ghost-btn" onclick="Yourself.closeDialog()">إلغاء</button>
+        <button class="btn btn-primary" onclick="Yourself.saveNote('${n.id||''}')">حفظ</button>
+        <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
       </div>`);
   }
   function saveNote(id){
@@ -711,7 +755,7 @@
     toast('تم الحذف.');
   }
 
-  // ---- EXERCISE / GYM ----
+  // ── EXERCISE ──
   function renderExercise(){
     if(!S.user) return;
     const now = new Date();
@@ -729,33 +773,32 @@
     const list = S.user.workouts.filter(w => S.exFilter === 'all' || w.category === S.exFilter).slice().reverse();
     $('workoutList').innerHTML = list.length ? list.map(w => `
       <div class="workout-item cat-${w.category}">
-        <div class="workout-head">
+        <div class="wo-head">
           <b>${esc(w.name)}</b>
           <span>${shortAr(new Date(w.createdAt))}</span>
         </div>
-        <div class="workout-meta">
+        <div class="wo-meta">
           <div><span>مجموعات</span><b>${w.sets || 0}</b></div>
           <div><span>تكرار</span><b>${w.reps || 0}</b></div>
           <div><span>وزن</span><b>${w.weight || 0}kg</b></div>
           <div><span>دقائق</span><b>${w.duration || 0}</b></div>
         </div>
-        <button class="workout-del" onclick="Yourself.removeWorkout('${w.id}')">حذف</button>
-      </div>`).join('') : '<div class="info-note"><b>لا توجد تمارين</b><span>أضف أول جلسة.</span></div>';
+        <button class="wo-del" onclick="Yourself.removeWorkout('${w.id}')">حذف</button>
+      </div>`).join('') : '<div class="empty"><b>لا توجد تمارين</b><span>أضف أول جلسة.</span></div>';
 
-    // week chart
     const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
     const counts = [0,0,0,0,0,0,0];
     weekWk.forEach(w => { const d = new Date(w.createdAt).getDay(); counts[d]++; });
     const max = Math.max(1, ...counts);
     $('weekChart').innerHTML = counts.map((c,i) => {
-      const h = Math.max(4, (c/max) * 160);
-      return `<div class="week-bar" style="height:${h}px"><b>${c || ''}</b><span>${days[i].slice(0,3)}</span></div>`;
+      const h = Math.max(6, (c/max) * 160);
+      return `<div class="wc-bar" style="height:${h}px"><b>${c || ''}</b><span>${days[i].slice(0,3)}</span></div>`;
     }).join('');
   }
   function openWorkoutDialog(){
     openDialog('تمرين جديد', 'سجّل جلستك.', `
       <label>اسم التمرين<input id="exName" type="text" placeholder="مثال: بنش برس"></label>
-      <div class="modal-grid">
+      <div class="two">
         <label>النوع<select id="exCat">
           <option value="gym">جيم</option><option value="cardio">كارديو</option>
           <option value="home">منزلي</option><option value="flex">تمدد</option>
@@ -766,8 +809,8 @@
       </div>
       <label>الوزن (كجم)<input id="exWeight" type="number" min="0" step="0.5" placeholder="60"></label>
       <div class="dialog-actions">
-        <button class="primary-btn" onclick="Yourself.saveWorkout()">حفظ</button>
-        <button class="ghost-btn" onclick="Yourself.closeDialog()">إلغاء</button>
+        <button class="btn btn-primary" onclick="Yourself.saveWorkout()">حفظ</button>
+        <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
       </div>`);
   }
   function saveWorkout(){
@@ -792,7 +835,7 @@
     toast('تم الحذف.');
   }
 
-  // ---- DIET ----
+  // ── DIET ──
   function renderDiet(){
     if(!S.user) return;
     const today = dayKey();
@@ -812,11 +855,11 @@
         <div class="meal-info">
           <b>${esc(m.name)}</b>
           <small>${esc(m.type || 'وجبة')} · ${m.protein || 0}g بروتين</small>
-          ${m.notes ? `<p>${esc(m.notes)}</p>` : ''}
-          <button class="workout-del" onclick="Yourself.removeMeal('${m.id}')">حذف</button>
+          ${m.notes ? `<p style="font-size:11.5px;color:var(--ink-3);margin-top:4px;line-height:1.6">${esc(m.notes)}</p>` : ''}
+          <button class="wo-del" onclick="Yourself.removeMeal('${m.id}')">حذف</button>
         </div>
         <span class="meal-kcal">${m.kcal || 0} kcal</span>
-      </div>`).join('') : '<div class="info-note"><b>لا وجبات اليوم</b><span>أضف وجبتك الأولى.</span></div>';
+      </div>`).join('') : '<div class="empty"><b>لا وجبات اليوم</b><span>أضف وجبتك الأولى.</span></div>';
 
     let wg = '';
     for(let i = 0; i < waterGoal; i++){
@@ -827,17 +870,17 @@
   function openMealDialog(){
     openDialog('وجبة جديدة', 'سجّل وجبتك.', `
       <label>الاسم<input id="mlName" type="text" placeholder="مثال: صدر دجاج وأرز"></label>
-      <div class="modal-grid">
+      <div class="two">
         <label>النوع<select id="mlType">
           <option>فطار</option><option>غداء</option><option>عشاء</option><option>سناك</option>
         </select></label>
         <label>السعرات<input id="mlKcal" type="number" min="0" placeholder="450"></label>
-        <label>البروتين (g)<input id="mlProtein" type="number" min="0" placeholder="30"></label>
       </div>
+      <label>البروتين (g)<input id="mlProtein" type="number" min="0" placeholder="30"></label>
       <label>ملاحظات<textarea id="mlNotes" placeholder="اختياري"></textarea></label>
       <div class="dialog-actions">
-        <button class="primary-btn" onclick="Yourself.saveMeal()">حفظ</button>
-        <button class="ghost-btn" onclick="Yourself.closeDialog()">إلغاء</button>
+        <button class="btn btn-primary" onclick="Yourself.saveMeal()">حفظ</button>
+        <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
       </div>`);
   }
   function saveMeal(){
@@ -883,7 +926,7 @@
     toast('تم تصفير الماء.');
   }
 
-  // ---- HEALTH ----
+  // ── HEALTH ──
   const plans = {
     balanced: [['الصباح','ماء + بداية هادئة + ترتيب الأولويات'],['العمل','فواصل قصيرة للحركة'],['بعد العمل','وجبة متنوعة + نشاط خفيف'],['المساء','تهدئة ونوم منتظم']],
     training: [['الأسبوع','3 جلسات نشاط مناسب'],['يوميًا','مشي أو حركة خفيفة'],['الاستشفاء','إحماء وتهدئة'],['المساء','نوم منتظم']],
@@ -922,7 +965,7 @@
   function openHealthDialog(){
     const p = S.user.profile;
     openDialog('البيانات الصحية', 'بيانات للمتابعة الشخصية.', `
-      <div class="modal-grid">
+      <div class="two">
         <label>العمر<input id="hAge" type="number" value="${p.age || ''}"></label>
         <label>الوزن<input id="hWeight" type="number" step="0.1" value="${p.weight || ''}"></label>
         <label>الطول<input id="hHeight" type="number" step="0.1" value="${p.height || ''}"></label>
@@ -933,8 +976,8 @@
         </select></label>
       </div>
       <div class="dialog-actions">
-        <button class="primary-btn" onclick="Yourself.saveHealth()">حفظ</button>
-        <button class="ghost-btn" onclick="Yourself.closeDialog()">إلغاء</button>
+        <button class="btn btn-primary" onclick="Yourself.saveHealth()">حفظ</button>
+        <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
       </div>`);
   }
   function saveHealth(){
@@ -946,7 +989,7 @@
     toast('تم الحفظ.');
   }
 
-  // ---- SETTINGS ----
+  // ── SETTINGS ──
   function renderSettings(){
     if(!S.user) return;
     const p = S.user.profile;
@@ -984,40 +1027,27 @@
   function openDeleteConfirm(){
     openDialog('حذف الحساب', 'سيتم حذف بياناتك من هذا المتصفح نهائيًا.', `
       <div class="dialog-actions">
-        <button class="danger-btn" onclick="Yourself.deleteAccount()">حذف نهائي</button>
-        <button class="ghost-btn" onclick="Yourself.closeDialog()">إلغاء</button>
+        <button class="btn btn-danger" onclick="Yourself.deleteAccount()">حذف نهائي</button>
+        <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
       </div>`);
   }
 
-  // ---- SEARCH / DEV ----
-  function openSearch(){
-    openDialog('بحث سريع', 'انتقل مباشرة للقسم.', `
-      <div class="modal-grid">
-        <button class="ghost-btn" onclick="Yourself.go('dashboard');Yourself.closeDialog()">الرئيسية</button>
-        <button class="ghost-btn" onclick="Yourself.go('work');Yourself.closeDialog()">العمل والدخل</button>
-        <button class="ghost-btn" onclick="Yourself.go('planner');Yourself.closeDialog()">تنظيم الوقت</button>
-        <button class="ghost-btn" onclick="Yourself.go('notes');Yourself.closeDialog()">المذكرة</button>
-        <button class="ghost-btn" onclick="Yourself.go('exercise');Yourself.closeDialog()">التمارين والجيم</button>
-        <button class="ghost-btn" onclick="Yourself.go('diet');Yourself.closeDialog()">الرجيم والغذاء</button>
-        <button class="ghost-btn" onclick="Yourself.go('health');Yourself.closeDialog()">الصحة والعادات</button>
-        <button class="ghost-btn" onclick="Yourself.go('settings');Yourself.closeDialog()">الإعدادات</button>
-      </div>`);
-  }
+  // ── DEV ──
   function bindSecret(){
     const el = $('brandSecret');
     if(!el) return;
     el.addEventListener('click', () => {
-      S.secretClicks++;
-      clearTimeout(S.secretTimer);
-      S.secretTimer = setTimeout(() => S.secretClicks = 0, 1600);
-      if(S.secretClicks >= 5){
-        S.secretClicks = 0;
+      S.secret.count++;
+      clearTimeout(S.secret.timer);
+      S.secret.timer = setTimeout(() => S.secret.count = 0, 1600);
+      if(S.secret.count >= 5){
+        S.secret.count = 0;
         openDialog('مركز المطوّر', 'الدخول مخفي عن المستخدمين.', `
           <label>البريد<input id="devEmail" type="email"></label>
           <label>كلمة المرور<input id="devPassword" type="password"></label>
           <div class="dialog-actions">
-            <button class="primary-btn" onclick="Yourself.devAuth()">دخول</button>
-            <button class="ghost-btn" onclick="Yourself.closeDialog()">إلغاء</button>
+            <button class="btn btn-primary" onclick="Yourself.devAuth()">دخول</button>
+            <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
           </div>`);
       }
     });
@@ -1040,7 +1070,7 @@
         <div class="dev-stat"><span>ملاحظات</span><b>${notes}</b></div>
         <div class="dev-stat"><span>تمارين</span><b>${wks}</b></div>
       </div>
-      <div class="dev-users">
+      <div>
         ${list.length ? list.map(u => `
           <div class="dev-user">
             <strong>${esc(u.name)}</strong>
@@ -1050,16 +1080,16 @@
               <button onclick="Yourself.inspectUser('${u.id}')">عرض</button>
               <button onclick="Yourself.deleteUser('${u.id}')">حذف</button>
             </div>
-          </div>`).join('') : '<div class="info-note">لا توجد حسابات.</div>'}
+          </div>`).join('') : '<div class="empty">لا توجد حسابات.</div>'}
       </div>`);
   }
   function inspectUser(id){
     const u = loadUsers().find(x => x.id === id);
     if(!u) return;
     openDialog('بيانات المستخدم', '', `
-      <div class="info-note">
+      <div class="empty" style="text-align:right;border-style:solid;background:var(--surface-2)">
         <b>${esc(u.name)}</b>
-        <span>
+        <span style="display:block;margin-top:6px;line-height:2">
           البريد: ${esc(u.email)}<br>
           الوظيفة: ${esc(u.profile?.job || '—')}<br>
           الدخل: ${fmtMoney(u.profile?.salary || 0)}<br>
@@ -1074,23 +1104,63 @@
     toast('تم الحذف.');
   }
 
-  // ============ BINDINGS ============
+  // ── GLOBAL SEARCH ──
+  function globalSearch(q){
+    q = q.trim().toLowerCase();
+    if(!q) return;
+    const results = [];
+    S.user.planner.forEach(t => { if(t.title.toLowerCase().includes(q)) results.push({ type:'مهمة', text:t.title, page:'planner' }); });
+    S.user.notes.forEach(n => { if((n.title + ' ' + n.content).toLowerCase().includes(q)) results.push({ type:'ملاحظة', text:n.title, page:'notes' }); });
+    S.user.workouts.forEach(w => { if(w.name.toLowerCase().includes(q)) results.push({ type:'تمرين', text:w.name, page:'exercise' }); });
+    if(!results.length){
+      openDialog('لا نتائج', `لم نعثر على شيء يطابق "${esc(q)}"`, '');
+      return;
+    }
+    openDialog('نتائج البحث', `${results.length} نتيجة`, `
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${results.slice(0,20).map(r => `
+          <button onclick="Yourself.go('${r.page}');Yourself.closeDialog()" style="text-align:right;padding:12px;background:var(--surface-2);border-radius:12px;border:1px solid var(--line)">
+            <small style="color:var(--ink-3);font-size:10.5px">${r.type}</small>
+            <div style="font-weight:700;font-size:13px;margin-top:2px">${esc(r.text)}</div>
+          </button>`).join('')}
+      </div>`);
+  }
+
+  // ══════════════════ BINDINGS ══════════════════
   function bindAuth(){
-    $$('[data-auth]').forEach(b => b.addEventListener('click', () => switchAuth(b.dataset.auth)));
+    $$('.auth-tab').forEach(b => b.addEventListener('click', () => switchAuth(b.dataset.mode)));
     $$('[data-pass]').forEach(b => b.addEventListener('click', () => togglePass(b.dataset.pass, b)));
-    $('regPassword').addEventListener('input', strength);
+    $('regPass').addEventListener('input', strength);
     $('loginForm').addEventListener('submit', login);
     $('registerForm').addEventListener('submit', register);
-    $('showDemoBtn').addEventListener('click', () =>
-      openDialog('Yourself', 'أنشئ حسابًا جديدًا وستظهر لك كل الخدمات.',
-        '<div class="info-note"><b>ابدأ بإنشاء حساب</b><span>ستحصل على لوحة كاملة بكل الخدمات.</span></div>'));
+    $('wNext').addEventListener('click', wizardNext);
+    $('wPrev').addEventListener('click', wizardPrev);
   }
 
   function bindApp(){
-    $$('.nav-item,[data-page]').forEach(b => b.addEventListener('click', () => go(b.dataset.page)));
+    // navigation
+    $$('.sb-item, .bn-item, [data-page]').forEach(b => {
+      if(b.dataset.page) b.addEventListener('click', () => go(b.dataset.page));
+    });
+    $('menuBtn').addEventListener('click', toggleSidebar);
+    document.addEventListener('click', e => {
+      if(window.innerWidth <= 900){
+        const sb = $('sidebar');
+        if(sb.classList.contains('open') && !sb.contains(e.target) && !$('menuBtn').contains(e.target)){
+          sb.classList.remove('open');
+        }
+      }
+    });
+
+    // top
     $('logoutBtn').addEventListener('click', logout);
     $('profileBtn').addEventListener('click', () => go('settings'));
-    $('searchBtn').addEventListener('click', openSearch);
+    $('themeBtn').addEventListener('click', cycleTheme);
+    $('notifBtn').addEventListener('click', () => toast('لا توجد إشعارات جديدة ✦'));
+    $('globalSearch').addEventListener('keydown', e => { if(e.key === 'Enter') globalSearch(e.target.value); });
+    document.addEventListener('keydown', e => {
+      if((e.ctrlKey || e.metaKey) && e.key === 'k'){ e.preventDefault(); $('globalSearch').focus(); }
+    });
 
     // dashboard
     $('manualStart').addEventListener('click', manualStart);
@@ -1142,10 +1212,18 @@
     // settings
     $('settingsForm').addEventListener('submit', saveSettings);
     $('deleteLocalBtn').addEventListener('click', openDeleteConfirm);
-    $$('.theme').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
+    $$('.theme-tile').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
   }
 
-  // ============ BOOT ============
+  function cycleTheme(){
+    const order = ['mint','night','sand','rose','ocean','forest'];
+    const cur = getPref().theme || 'mint';
+    const next = order[(order.indexOf(cur) + 1) % order.length];
+    setTheme(next);
+    toast('الثيم: ' + next);
+  }
+
+  // ══════════════════ BOOT ══════════════════
   function boot(){
     setTheme(getPref().theme || 'mint');
     bindAuth();
@@ -1158,7 +1236,7 @@
     }
   }
 
-  // ============ EXPOSE ============
+  // ══════════════════ EXPOSE ══════════════════
   window.Yourself = {
     go, closeDialog,
     saveMoney, removeMoney, saveWork,
@@ -1171,9 +1249,6 @@
     devAuth, inspectUser, deleteUser
   };
 
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
-    boot();
-  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
