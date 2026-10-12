@@ -1,10 +1,10 @@
 (() => {
   'use strict';
 
-  // ═══════════ CONSTANTS ═══════════
-  const USERS_KEY   = 'yourself_v7_users';
-  const SESSION_KEY = 'yourself_v7_session';
-  const PREF_KEY    = 'yourself_v7_pref';
+  const USERS_KEY   = 'yourself_v11_users';
+  const SESSION_KEY = 'yourself_v11_session';
+  const PREF_KEY    = 'yourself_v11_pref';
+  const DEV_SESSION = 'yourself_v11_dev';
 
   const DEVS = [
     { email:'hoang@gmail.com',  pass:'Hoang123' },
@@ -14,7 +14,7 @@
   const $  = id => document.getElementById(id);
   const $$ = s  => [...document.querySelectorAll(s)];
 
-  // ═══════════ HELPERS ═══════════
+  // ─── Helpers ───
   const uid     = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
   const emailOf = x => String(x||'').trim().toLowerCase();
   const dayKey  = (d=new Date()) => {
@@ -26,19 +26,23 @@
   const fmtNum   = n => (Math.round(Number(n)||0)).toLocaleString('en-US');
   const dateAr   = d => new Intl.DateTimeFormat('ar-EG',{day:'numeric',month:'long',year:'numeric'}).format(new Date(d));
   const shortAr  = d => new Intl.DateTimeFormat('ar-EG',{day:'2-digit',month:'2-digit'}).format(new Date(d));
+  const timeAr   = d => new Intl.DateTimeFormat('ar-EG',{hour:'2-digit',minute:'2-digit'}).format(new Date(d));
   const timeMins = t => { const [h,m]=String(t||'00:00').split(':').map(Number); return (h||0)*60+(m||0); };
   const hoursBetween = (a,b) => { let x=timeMins(a), y=timeMins(b); if(y<x) y+=1440; return (y-x)/60; };
 
-  // ═══════════ STORAGE ═══════════
-  const loadUsers    = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY)||'[]'); } catch { return []; } };
-  const saveUsers    = u  => localStorage.setItem(USERS_KEY, JSON.stringify(u));
-  const getSession   = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); } catch { return null; } };
-  const setSession   = e  => localStorage.setItem(SESSION_KEY, JSON.stringify({ email:e, at:Date.now() }));
+  // ─── Storage ───
+  const loadUsers  = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY)||'[]'); } catch { return []; } };
+  const saveUsers  = u  => localStorage.setItem(USERS_KEY, JSON.stringify(u));
+  const getSession = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); } catch { return null; } };
+  const setSession = e  => localStorage.setItem(SESSION_KEY, JSON.stringify({ email:e, at:Date.now() }));
   const clearSession = () => localStorage.removeItem(SESSION_KEY);
-  const getPref      = () => { try { return JSON.parse(localStorage.getItem(PREF_KEY)||'{}'); } catch { return {}; } };
-  const setPref      = p  => localStorage.setItem(PREF_KEY, JSON.stringify(p));
+  const getPref    = () => { try { return JSON.parse(localStorage.getItem(PREF_KEY)||'{}'); } catch { return {}; } };
+  const setPref    = p  => localStorage.setItem(PREF_KEY, JSON.stringify(p));
+  const getDevSession = () => { try { return JSON.parse(localStorage.getItem(DEV_SESSION)||'null'); } catch { return null; } };
+  const setDevSession = e => localStorage.setItem(DEV_SESSION, JSON.stringify({ email:e, at:Date.now() }));
+  const clearDevSession = () => localStorage.removeItem(DEV_SESSION);
 
-  // ═══════════ STATE ═══════════
+  // ─── State ───
   const S = {
     user: null,
     page: 'dashboard',
@@ -50,10 +54,12 @@
     focus: { seconds:1500, running:false, interval:null },
     tick: null,
     secret: { count:0, timer:null },
-    wizard: 1
+    wizard: 1,
+    tempAccount: null,
+    devFilter: 'pending'
   };
 
-  // ═══════════ DEFAULTS ═══════════
+  // ─── Defaults ───
   const defaultProfile = () => ({
     job:'', salaryType:'monthly', salary:0, workDays:5,
     workStart:'08:30', workEnd:'17:00', offDays:'الجمعة، السبت',
@@ -71,9 +77,9 @@
       { id:'sleep', title:'نوم منتظم',    meta:'قرب موعد نومك',      done:false, date:d }
     ];
   };
-  const defaultUser = (o={}) => ({
-    id: uid(),
-    name:'', email:'', password:'',
+  const newUser = (o={}) => ({
+    id: uid(), name:'', email:'', password:'',
+    status: 'pending', // pending | approved | rejected
     createdAt: new Date().toISOString(),
     profile: defaultProfile(),
     finance: [], notes: [], planner: [],
@@ -85,7 +91,7 @@
   });
   function normalizeUser(u){
     if(!u) return null;
-    const base = defaultUser();
+    const base = newUser();
     const today = dayKey();
     let habits = Array.isArray(u.habits) && u.habits.length ? u.habits : base.habits;
     if(habits[0] && habits[0].date !== today){
@@ -114,7 +120,7 @@
     saveUsers(list);
   }
 
-  // ═══════════ WORK LOGIC ═══════════
+  // ─── Work logic (auto earnings) ───
   const offMap = {
     'الأحد':0,'الاحد':0,'sunday':0,
     'الاثنين':1,'الإثنين':1,'monday':1,
@@ -158,28 +164,52 @@
     const days = Number(p.workDays) || 5;
     return h > 0 ? salary / (days * 4.345 * h) : 0;
   }
-  function todaySnapshot(){
-    if(!S.user) return { state:'—', meta:'—', elapsedMs:0, mode:'off' };
-    const key = dayKey();
+  function calcDayEarnings(date){
+    if(!S.user) return { hours:0, earnings:0, locked:true, mode:'off', isToday:false };
     const now = new Date();
-    const c = S.user.workControl;
-    if(c && c.date === key && c.startedAt){
-      const start = new Date(c.startedAt);
-      const schedEnd = workWindow(now).end;
-      const stop = c.stoppedAt ? new Date(c.stoppedAt) : now;
-      const end = stop < schedEnd ? stop : schedEnd;
-      return {
-        state: c.stoppedAt ? 'انتهت الجلسة' : (now >= schedEnd ? 'انتهى وقت العمل' : 'عمل يدوي جارٍ'),
-        meta: c.stoppedAt ? 'تم حفظ الجلسة' : 'الجلسة محفوظة',
-        elapsedMs: Math.max(0, end - start),
-        mode: 'manual'
-      };
+    const nowK = dayKey(now);
+    const k = dayKey(date);
+    if(!isWorkday(date)) return { hours:0, earnings:0, locked:true, mode:'off', isToday:k===nowK };
+    const rate = hourlyRate();
+    const { start, end } = workWindow(date);
+    const fullHours = (end - start) / 3600000;
+    if(k < nowK) return { hours:fullHours, earnings:rate*fullHours, locked:true, mode:'auto', isToday:false };
+    if(k > nowK) return { hours:0, earnings:0, locked:true, mode:'auto', isToday:false };
+    const mc = S.user.workControl;
+    if(mc && mc.date === k && mc.startedAt){
+      const mStart = new Date(mc.startedAt);
+      const mEnd = mc.stoppedAt ? new Date(mc.stoppedAt) : now;
+      const s = mStart > start ? mStart : start;
+      const e = mEnd < end ? mEnd : end;
+      const hrs = Math.max(0, (e - s) / 3600000);
+      return { hours:hrs, earnings:rate*hrs, locked:!!mc.stoppedAt || now>=end, mode:'manual', isToday:true };
     }
-    if(!isWorkday(now)) return { state:'إجازة اليوم', meta:'لا يوجد احتساب', elapsedMs:0, mode:'off' };
-    const { start, end } = workWindow(now);
-    if(now < start) return { state:'قبل بداية العمل', meta:`يبدأ ${S.user.profile.workStart}`, elapsedMs:0, mode:'auto' };
-    if(now >= end)  return { state:'انتهى وقت العمل', meta:`انتهى ${S.user.profile.workEnd}`, elapsedMs:end-start, mode:'auto' };
-    return { state:'يعمل تلقائيًا', meta:`يتوقف ${S.user.profile.workEnd}`, elapsedMs:now-start, mode:'auto' };
+    if(now < start) return { hours:0, earnings:0, locked:false, mode:'auto', isToday:true };
+    if(now >= end) return { hours:fullHours, earnings:rate*fullHours, locked:true, mode:'auto', isToday:true };
+    const hrs = (now - start) / 3600000;
+    return { hours:hrs, earnings:rate*hrs, locked:false, mode:'auto', isToday:true };
+  }
+  function monthlyEarned(){
+    if(!S.user) return 0;
+    const now = new Date();
+    const first = new Date(now.getFullYear(), now.getMonth(), 1);
+    const last = new Date(now.getFullYear(), now.getMonth()+1, 0);
+    let total = 0;
+    for(let d = new Date(first); d <= last; d.setDate(d.getDate()+1)){
+      total += calcDayEarnings(new Date(d)).earnings;
+    }
+    return total;
+  }
+  function todayStatus(){
+    const snap = calcDayEarnings(new Date());
+    if(snap.mode === 'off') return { state:'إجازة اليوم', meta:'لا يوجد احتساب', ...snap };
+    if(snap.locked) return { state:'انتهى وقت العمل', meta:'اكتمل مكسب اليوم', ...snap };
+    const p = S.user.profile;
+    const { start } = workWindow(new Date());
+    const now = new Date();
+    if(now < start) return { state:'قبل بداية العمل', meta:`يبدأ تلقائيًا ${p.workStart}`, ...snap };
+    if(snap.mode === 'manual') return { state:'عمل يدوي جارٍ', meta:'الجلسة محفوظة', ...snap };
+    return { state:'يعمل تلقائيًا', meta:`يتوقف ${p.workEnd}`, ...snap };
   }
   function monthlyProgress(){
     if(!S.user) return 0;
@@ -198,7 +228,7 @@
     return sched ? Math.min(100, Math.round(elapsed/sched*100)) : 0;
   }
 
-  // ═══════════ UI ═══════════
+  // ─── UI Helpers ───
   function toast(text){
     const el = document.createElement('div');
     el.className = 'toast';
@@ -235,100 +265,179 @@
   }
   function setTheme(name){
     document.documentElement.className = '';
-    if(name && name !== 'royal') document.documentElement.classList.add('theme-' + name);
+    if(name && name !== 'teal') document.documentElement.classList.add('theme-' + name);
     const p = getPref(); p.theme = name; setPref(p);
     $$('.theme-tile').forEach(b => b.classList.toggle('active', b.dataset.theme === name));
   }
 
-  // ═══════════ AUTH ═══════════
-  function switchAuth(mode){
-    $$('.auth-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-    /* ✅ FIX: استخدام querySelector للـ class وليس getElementById */
-    const slider = document.querySelector('.auth-tab-slider');
-    if(slider) slider.classList.toggle('right', mode === 'register');
-    $('loginForm').classList.toggle('hidden', mode !== 'login');
-    $('registerForm').classList.toggle('hidden', mode !== 'register');
-    if(mode === 'register') setWizard(1);
-    showMsg('loginMsg',''); showMsg('registerMsg','');
+  // ─── Screen management ───
+  function hideAllScreens(){
+    ['loginScreen','accountScreen','registerScreen','pendingScreen','devScreen','appView']
+      .forEach(id => $(id)?.classList.add('hidden'));
   }
-  function togglePass(id, btn){
-    const el = $(id);
-    el.type = el.type === 'password' ? 'text' : 'password';
-    btn.textContent = el.type === 'password' ? 'إظهار' : 'إخفاء';
+  function showLogin(){
+    hideAllScreens();
+    $('loginScreen').classList.remove('hidden');
+    $('loginEmail').value = '';
+    $('loginPassword').value = '';
+    showMsg('loginMsg','');
   }
-  function strength(){
-    const v = $('regPass').value;
-    const t = [v.length>=8, /[A-Za-zأ-ي]/.test(v), /\d/.test(v), /[^A-Za-z0-9أ-ي]/.test(v)];
-    const score = t.filter(Boolean).length;
-    $$('.strength span').forEach((x,i) => x.classList.toggle('on', i < score));
-    const s = document.querySelector('.strength small');
-    if(s) s.textContent = 'قوة كلمة المرور · ' +
-      (score < 2 ? 'ضعيفة' : score === 2 ? 'متوسطة' : score === 3 ? 'جيدة' : 'قوية');
+  function showAccount(){
+    hideAllScreens();
+    $('accountScreen').classList.remove('hidden');
+    showMsg('accMsg','');
   }
-  function setWizard(step){
-    S.wizard = step;
-    $$('.wizard-pane').forEach(p => p.classList.toggle('active', +p.dataset.pane === step));
-    $$('.w-step').forEach(s => {
-      const n = +s.dataset.step;
-      s.classList.toggle('active', n === step);
-      s.classList.toggle('done', n < step);
-    });
-    $('wizardBar').style.width = (step * 25) + '%';
-    $('wPrev').disabled = step === 1;
-    $('wNext').classList.toggle('hidden', step === 4);
-    $('wFinish').classList.toggle('hidden', step !== 4);
+  function showRegister(){
+    hideAllScreens();
+    $('registerScreen').classList.remove('hidden');
+    setWizard(1);
+    showMsg('registerMsg','');
   }
-  function wizardNext(){
-    const step = S.wizard;
-    if(step === 1){
-      const name = $('regName').value.trim();
-      const email = emailOf($('regEmail').value);
-      const p = $('regPass').value;
-      const p2 = $('regPass2').value;
-      if(!name) return showMsg('registerMsg','اكتب اسمك.');
-      if(!email || !/\S+@\S+\.\S+/.test(email)) return showMsg('registerMsg','بريد غير صالح.');
-      if(p.length < 8) return showMsg('registerMsg','كلمة المرور 8 أحرف على الأقل.');
-      if(p !== p2) return showMsg('registerMsg','تأكيد كلمة المرور غير مطابق.');
-      if(loadUsers().some(x => emailOf(x.email) === email) || DEVS.some(x => x.email === email))
-        return showMsg('registerMsg','البريد مستخدم بالفعل.');
-      showMsg('registerMsg','');
-    }
-    if(step === 2){
-      const job = $('regJob').value.trim();
-      const sal = Number($('regSalary').value);
-      if(!job) return showMsg('registerMsg','اكتب الوظيفة.');
-      if(!sal || sal <= 0) return showMsg('registerMsg','أدخل الدخل.');
-      showMsg('registerMsg','');
-    }
-    setWizard(Math.min(4, step + 1));
+  function showPending(email){
+    hideAllScreens();
+    $('pendingScreen').classList.remove('hidden');
+    $('pendingEmail').textContent = email;
+    $('pendingTime').textContent = timeAr(new Date());
   }
-  function wizardPrev(){
-    if(S.wizard > 1) setWizard(S.wizard - 1);
+  function showDev(){
+    hideAllScreens();
+    $('devScreen').classList.remove('hidden');
+    renderDevScreen();
   }
+  function enterApp(u){
+    S.user = normalizeUser(u);
+    hideAllScreens();
+    $('appView').classList.remove('hidden');
+    renderAll();
+    go('dashboard');
+    startTick();
+  }
+  function logout(){
+    clearSession();
+    if(S.tick) clearInterval(S.tick);
+    S.user = null;
+    showLogin();
+  }
+
+  // ─── Auth: Login ───
   function login(e){
     e.preventDefault();
     const email = emailOf($('loginEmail').value);
     const pass = $('loginPassword').value;
     if(!email || !pass) return showMsg('loginMsg','أدخل البريد وكلمة المرور.');
-    if(DEVS.some(d => d.email === email && d.pass === pass)) return openDevCenter();
-    const u = loadUsers().find(x => emailOf(x.email) === email && x.password === pass);
-    if(!u) return showMsg('loginMsg','بيانات الدخول غير صحيحة.');
+
+    // Developer check
+    if(DEVS.some(d => d.email === email && d.pass === pass)){
+      setDevSession(email);
+      return showDev();
+    }
+
+    const u = loadUsers().find(x => emailOf(x.email) === email);
+    if(!u || u.password !== pass)
+      return showMsg('loginMsg','بيانات الدخول غير صحيحة.');
+
+    if(u.status === 'pending')
+      return showMsg('loginMsg','حسابك قيد المراجعة من المطوّر. يرجى الانتظار حتى الموافقة.', 'info');
+
+    if(u.status === 'rejected')
+      return showMsg('loginMsg','تم رفض طلب إنشاء حسابك. تواصل مع المطوّر لمزيد من التفاصيل.');
+
+    if(u.status === 'approved'){
+      setSession(u.email);
+      return enterApp(u);
+    }
+
+    // Legacy accounts without status → treat as approved
     setSession(u.email);
     enterApp(u);
   }
-  function register(e){
+
+  // ─── Auth: Account (email + password) ───
+  function strengthAccount(){
+    const v = $('accPass').value;
+    const t = [v.length>=8, /[A-Za-zأ-ي]/.test(v), /\d/.test(v), /[^A-Za-z0-9أ-ي]/.test(v)];
+    const score = t.filter(Boolean).length;
+    const bars = $('accountForm').querySelectorAll('.strength i');
+    bars.forEach((x,i) => x.classList.toggle('on', i < score));
+    const s = $('accountForm').querySelector('.strength small');
+    if(s) s.textContent = 'قوة كلمة المرور · ' +
+      (score < 2 ? 'ضعيفة' : score === 2 ? 'متوسطة' : score === 3 ? 'جيدة' : 'قوية');
+  }
+  function accountSubmit(e){
     e.preventDefault();
-    const p = $('regPass').value;
+    const name = $('accName').value.trim();
+    const email = emailOf($('accEmail').value);
+    const p = $('accPass').value;
+    const p2 = $('accPass2').value;
+
+    if(!name) return showMsg('accMsg','اكتب اسمك الكامل.');
+    if(!email || !/\S+@\S+\.\S+/.test(email)) return showMsg('accMsg','أدخل بريدًا صحيحًا.');
+    if(p.length < 8) return showMsg('accMsg','كلمة المرور 8 أحرف على الأقل.');
+    if(p !== p2) return showMsg('accMsg','تأكيد كلمة المرور غير مطابق.');
+    if(loadUsers().some(x => emailOf(x.email) === email) || DEVS.some(x => x.email === email))
+      return showMsg('accMsg','هذا البريد مستخدم بالفعل.');
+
+    S.tempAccount = { name, email, password: p };
+    showRegister();
+  }
+
+  // ─── Register wizard ───
+  function setWizard(step){
+    S.wizard = step;
+    $$('.wp').forEach(p => p.classList.toggle('active', +p.dataset.pane === step));
+
+    // update step indicators (2, 3, 4 correspond to wizard 1, 2, 3)
+    $$('.wstep').forEach(s => {
+      const n = s.dataset.step ? +s.dataset.step : null;
+      if(n === null) return; // account step (1) is always done
+      s.classList.toggle('active', n === step);
+      s.classList.toggle('done', n < step);
+    });
+    // progress bar: start at 50% after account, end at 100%
+    const pct = 50 + (step - 1) * (50 / 3);
+    $('wizBar').style.width = pct + '%';
+    const labels = ['البيانات الشخصية','العمل والدخل','الروتين والصحة'];
+    $('wizLabel').textContent = `الخطوة ${step + 1} من 4 · ${labels[step - 1]}`;
+    $('wPrev').disabled = step === 1;
+    $('wNext').classList.toggle('hidden', step === 3);
+    $('wFinish').classList.toggle('hidden', step !== 3);
+    showMsg('registerMsg','');
+  }
+  function wizardNext(){
+    const step = S.wizard;
+    if(step === 1){
+      const age = Number($('regAge').value);
+      if(age && (age < 1 || age > 120)) return showMsg('registerMsg','العمر غير صحيح.');
+    }
+    if(step === 2){
+      const job = $('regJob').value.trim();
+      const sal = Number($('regSalary').value);
+      if(!job) return showMsg('registerMsg','اكتب الوظيفة أو المجال.');
+      if(!sal || sal <= 0) return showMsg('registerMsg','أدخل قيمة الدخل.');
+    }
+    setWizard(Math.min(3, step + 1));
+  }
+  function wizardPrev(){
+    if(S.wizard > 1) setWizard(S.wizard - 1);
+    else showAccount();
+  }
+
+  // ─── Register submit ───
+  function registerSubmit(e){
+    e.preventDefault();
+    if(!S.tempAccount) return showAccount();
+
     const act = document.querySelector('input[name="act"]:checked')?.value || 'moderate';
-    const data = defaultUser({
-      name: $('regName').value.trim(),
-      email: emailOf($('regEmail').value),
-      password: p,
+    const u = newUser({
+      name: S.tempAccount.name,
+      email: S.tempAccount.email,
+      password: S.tempAccount.password,
+      status: 'pending',
       profile: {
         job: $('regJob').value.trim(),
         salaryType: $('regSalaryType').value,
         salary: Number($('regSalary').value) || 0,
-        workDays: Number($('regDays').value) || 5,
+        workDays: Number($('regWorkDays').value) || 5,
         workStart: $('regStart').value || '08:30',
         workEnd:   $('regEnd').value   || '17:00',
         offDays:   $('regOff').value.trim() || 'الجمعة، السبت',
@@ -347,33 +456,197 @@
       habits: defaultHabits()
     });
     const d = dayKey();
-    data.planner = [
-      { id: uid(), date:d, time:data.profile.goWork,    title:'الذهاب للعمل', category:'روتين',   done:false },
-      { id: uid(), date:d, time:data.profile.workStart, title:'بداية العمل',  category:'عمل',     done:false },
-      { id: uid(), date:d, time:'13:00',                title:'فاصل وغداء',   category:'استراحة', done:false },
-      { id: uid(), date:d, time:data.profile.workEnd,   title:'إغلاق العمل',  category:'عمل',     done:false }
+    u.planner = [
+      { id: uid(), date:d, time:u.profile.goWork,    title:'الذهاب للعمل', category:'روتين',   done:false },
+      { id: uid(), date:d, time:u.profile.workStart, title:'بداية العمل',  category:'عمل',     done:false },
+      { id: uid(), date:d, time:'13:00',             title:'فاصل وغداء',   category:'استراحة', done:false },
+      { id: uid(), date:d, time:u.profile.workEnd,   title:'إغلاق العمل',  category:'عمل',     done:false }
     ];
     const list = loadUsers();
-    list.push(data);
+    list.push(u);
     saveUsers(list);
-    setSession(data.email);
-    enterApp(data);
-    toast('أهلًا بك في Yourself ✦');
+
+    const email = u.email;
+    S.tempAccount = null;
+    showPending(email);
+    toast('تم إرسال طلبك للمطوّر ✦');
   }
-  function enterApp(u){
-    S.user = normalizeUser(u);
-    $('authView').classList.add('hidden');
-    $('appView').classList.remove('hidden');
-    renderAll();
-    go('dashboard');
-    startTick();
+
+  // ═══════════════════════════════════════════════════════
+  // DEVELOPER CONSOLE
+  // ═══════════════════════════════════════════════════════
+  function renderDevScreen(){
+    const list = loadUsers();
+    const pending = list.filter(u => u.status === 'pending' || !u.status).length;
+    const approved = list.filter(u => u.status === 'approved' || (!u.status && u.email)).length;
+    const rejected = list.filter(u => u.status === 'rejected').length;
+    // Fix: count legacy as approved
+    const totalApproved = list.filter(u => u.status !== 'pending' && u.status !== 'rejected').length;
+
+    $('dTotal').textContent = list.length;
+    $('dPending').textContent = pending;
+    $('dApproved').textContent = totalApproved;
+    $('dRejected').textContent = rejected;
+
+    // Notification badge
+    const badge = $('devNotifBadge');
+    if(pending > 0){
+      badge.textContent = pending;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+
+    $('fPending').textContent = pending;
+
+    // Render list based on filter
+    renderDevList();
   }
-  function logout(){
-    clearSession();
-    if(S.tick) clearInterval(S.tick);
-    S.user = null;
-    location.reload();
+  function renderDevList(){
+    const list = loadUsers();
+    let filtered = list;
+    if(S.devFilter === 'pending') filtered = list.filter(u => u.status === 'pending' || !u.status);
+    else if(S.devFilter === 'approved') filtered = list.filter(u => u.status === 'approved' || (!u.status && u.email));
+    else if(S.devFilter === 'rejected') filtered = list.filter(u => u.status === 'rejected');
+
+    // Sort: pending first, then by date
+    filtered = filtered.slice().sort((a,b) => {
+      const sa = a.status === 'pending' || !a.status ? 0 : 1;
+      const sb = b.status === 'pending' || !b.status ? 0 : 1;
+      if(sa !== sb) return sa - sb;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    const container = $('devList');
+    if(!filtered.length){
+      container.innerHTML = `<div class="empty" style="grid-column:1/-1;text-align:center;padding:40px">
+        <b>لا توجد حسابات</b>
+        <span>${S.devFilter === 'pending' ? 'لا يوجد طلبات في الانتظار.' : 'لا توجد نتائج في هذا التصنيف.'}</span>
+      </div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(u => {
+      const status = u.status || 'approved';
+      const statusLabel = status === 'pending' ? 'قيد المراجعة' : status === 'approved' ? 'مقبول' : 'مرفوض';
+      const initial = (u.name || '?').trim().charAt(0).toUpperCase();
+      const workHours = hoursBetween(u.profile?.workStart||'00:00', u.profile?.workEnd||'00:00').toFixed(1);
+      return `
+        <div class="user-card ${status}">
+          <div class="user-head">
+            <div class="user-head-left">
+              <div class="user-avatar">${initial}</div>
+              <div>
+                <b>${esc(u.name || 'بدون اسم')}</b>
+                <small>${esc(u.email || '—')}</small>
+              </div>
+            </div>
+            <span class="status ${status}">${statusLabel}</span>
+          </div>
+
+          <div class="user-details">
+            <div><span>الوظيفة</span><b>${esc(u.profile?.job || '—')}</b></div>
+            <div><span>الدخل</span><b>${fmtMoney(u.profile?.salary || 0)}</b></div>
+            <div><span>الدوام</span><b>${esc(u.profile?.workStart||'—')} → ${esc(u.profile?.workEnd||'—')}</b></div>
+            <div><span>ساعات / يوم</span><b>${workHours}h</b></div>
+            <div><span>الإجازة</span><b>${esc(u.profile?.offDays || '—')}</b></div>
+            <div><span>مسجّل في</span><b>${shortAr(new Date(u.createdAt))}</b></div>
+          </div>
+
+          <div class="user-actions">
+            ${status === 'pending' ? `
+              <button class="btn btn-primary sm" onclick="Yourself.approveUser('${u.id}')">✓ قبول</button>
+              <button class="btn btn-danger sm" onclick="Yourself.rejectUser('${u.id}')">✕ رفض</button>
+            ` : ''}
+            ${status === 'approved' ? `
+              <button class="btn btn-danger sm" onclick="Yourself.rejectUser('${u.id}')">↺ تعليق الحساب</button>
+            ` : ''}
+            ${status === 'rejected' ? `
+              <button class="btn btn-primary sm" onclick="Yourself.approveUser('${u.id}')">✓ إعادة قبول</button>
+            ` : ''}
+            <button class="btn btn-ghost sm" onclick="Yourself.inspectUser('${u.id}')">تفاصيل</button>
+            <button class="btn btn-ghost sm" onclick="Yourself.deleteUser('${u.id}')">حذف</button>
+          </div>
+        </div>`;
+    }).join('');
   }
+  function approveUser(id){
+    const list = loadUsers();
+    const i = list.findIndex(x => x.id === id);
+    if(i < 0) return;
+    list[i].status = 'approved';
+    list[i].approvedAt = new Date().toISOString();
+    saveUsers(list);
+    renderDevScreen();
+    toast('تم قبول الحساب ✓');
+  }
+  function rejectUser(id){
+    const list = loadUsers();
+    const i = list.findIndex(x => x.id === id);
+    if(i < 0) return;
+    list[i].status = 'rejected';
+    list[i].rejectedAt = new Date().toISOString();
+    saveUsers(list);
+    renderDevScreen();
+    toast('تم رفض الحساب.');
+  }
+  function inspectUser(id){
+    const u = loadUsers().find(x => x.id === id);
+    if(!u) return;
+    const status = u.status || 'approved';
+    const statusLabel = status === 'pending' ? 'قيد المراجعة' : status === 'approved' ? 'مقبول' : 'مرفوض';
+    openDialog('تفاصيل الحساب', u.name + ' · ' + u.email, `
+      <div class="user-details" style="margin-bottom:14px">
+        <div><span>الاسم</span><b>${esc(u.name)}</b></div>
+        <div><span>البريد</span><b>${esc(u.email)}</b></div>
+        <div><span>الحالة</span><b>${statusLabel}</b></div>
+        <div><span>الوظيفة</span><b>${esc(u.profile?.job||'—')}</b></div>
+        <div><span>الدخل</span><b>${fmtMoney(u.profile?.salary||0)}</b></div>
+        <div><span>نوع الدخل</span><b>${u.profile?.salaryType === 'hourly' ? 'بالساعة' : 'شهري'}</b></div>
+        <div><span>ساعات/يوم</span><b>${hoursBetween(u.profile?.workStart||'00:00', u.profile?.workEnd||'00:00').toFixed(1)}h</b></div>
+        <div><span>أيام/أسبوع</span><b>${u.profile?.workDays||0}</b></div>
+        <div><span>الدوام</span><b>${esc(u.profile?.workStart||'—')} → ${esc(u.profile?.workEnd||'—')}</b></div>
+        <div><span>الإجازة</span><b>${esc(u.profile?.offDays||'—')}</b></div>
+        <div><span>الاستيقاظ</span><b>${esc(u.profile?.wake||'—')}</b></div>
+        <div><span>النوم</span><b>${esc(u.profile?.sleep||'—')}</b></div>
+        <div><span>العمر</span><b>${esc(u.profile?.age||'—')}</b></div>
+        <div><span>الوزن</span><b>${esc(u.profile?.weight||'—')} kg</b></div>
+        <div><span>الطول</span><b>${esc(u.profile?.height||'—')} cm</b></div>
+        <div><span>الهدف</span><b>${esc(u.profile?.goal||'—')}</b></div>
+        <div><span>مسجّل في</span><b>${dateAr(new Date(u.createdAt))}</b></div>
+      </div>
+      <div class="dialog-actions">
+        ${status === 'pending' ? `
+          <button class="btn btn-primary" onclick="Yourself.approveUser('${u.id}');Yourself.closeDialog()">✓ قبول الحساب</button>
+          <button class="btn btn-danger" onclick="Yourself.rejectUser('${u.id}');Yourself.closeDialog()">✕ رفض</button>
+        ` : status === 'approved' ? `
+          <button class="btn btn-danger" onclick="Yourself.rejectUser('${u.id}');Yourself.closeDialog()">تعليق الحساب</button>
+          <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إغلاق</button>
+        ` : `
+          <button class="btn btn-primary" onclick="Yourself.approveUser('${u.id}');Yourself.closeDialog()">إعادة قبول</button>
+          <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إغلاق</button>
+        `}
+      </div>`);
+  }
+  function deleteUser(id){
+    if(!confirm('هل تريد حذف هذا الحساب نهائيًا؟')) return;
+    saveUsers(loadUsers().filter(x => x.id !== id));
+    renderDevScreen();
+    toast('تم حذف الحساب.');
+  }
+
+  // ─── Auto refresh dev screen (every 5s) ───
+  function startDevTick(){
+    setInterval(() => {
+      if(!$('devScreen').classList.contains('hidden')){
+        renderDevScreen();
+      }
+    }, 5000);
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // MAIN APP
+  // ═══════════════════════════════════════════════════════
   function startTick(){
     if(S.tick) clearInterval(S.tick);
     S.tick = setInterval(() => {
@@ -381,8 +654,6 @@
       if(S.page === 'dashboard') renderDashboard();
     }, 1000);
   }
-
-  // ═══════════ NAV ═══════════
   function go(page){
     if(!S.user) return;
     S.page = page;
@@ -400,7 +671,6 @@
   }
   function toggleSidebar(){ $('sidebar').classList.toggle('open'); }
 
-  // ═══════════ RENDER ═══════════
   function renderTop(){
     const name = S.user.name || 'صديقي';
     $('topName').textContent = name;
@@ -415,13 +685,13 @@
     renderDashboard(); renderWork(); renderPlanner(); renderNotes();
     renderExercise(); renderDiet(); renderHealth(); renderSettings();
   }
-
-  // ─── DASHBOARD ───
   function fmtDur(ms){
     const t = Math.max(0, Math.floor(ms/1000));
     const h = Math.floor(t/3600), m = Math.floor((t%3600)/60), s = t%60;
     return [h,m,s].map(x => String(x).padStart(2,'0')).join(':');
   }
+
+  // ── Dashboard ──
   function renderDashboard(){
     if(!S.user) return;
     const p = S.user.profile;
@@ -430,33 +700,34 @@
     $('dateText').textContent = dateAr(now);
     $('todayText').textContent = `هدفك: ${p.goal} · الدوام ${p.workStart} → ${p.workEnd}`;
 
-    const snap = todaySnapshot();
+    const st = todayStatus();
     const rate = hourlyRate();
-    const h = snap.elapsedMs / 3600000;
+    const monthTotal = monthlyEarned();
 
-    $('kHourRate').textContent       = fmtNum(rate);
-    $('kTodayEarned').textContent    = fmtNum(h * rate);
-    $('kTodayEarnedMeta').textContent= snap.state;
-    $('kTodayHours').textContent     = h.toFixed(2) + 'h';
-    $('kTodayHoursMeta').textContent = snap.meta;
-    $('kTodayTasks').textContent     = S.user.planner.filter(x => x.date === dayKey()).length;
+    $('kTodayEarned').textContent = fmtNum(st.earnings);
+    $('kTodayEarnedMeta').textContent = st.state;
+    $('kHourRate').textContent = fmtNum(rate);
+    $('kTodayHours').textContent = st.hours.toFixed(2) + 'h';
+    $('kTodayHoursMeta').textContent = st.meta;
+    $('kMonthEarned').textContent = fmtNum(monthTotal);
+    $('kMonthEarnedMeta').textContent = `${monthlyProgress()}% من الشهر`;
 
-    $('clockBadge').textContent = snap.state;
-    $('clockState').textContent = snap.state;
-    $('clockMeta').textContent  = snap.meta;
-    $('timer').textContent      = fmtDur(snap.elapsedMs);
-    $('clockEarn').textContent  = fmtMoney(h * rate);
+    $('clockBadge').textContent = st.state;
+    $('clockState').textContent = st.state;
+    $('clockMeta').textContent  = st.meta;
+    $('timer').textContent      = fmtDur(st.hours * 3600000);
+    $('clockEarn').textContent  = fmtMoney(st.earnings);
 
-    const pct = Math.min(1, h / 8);
+    const pct = Math.min(1, st.hours / 8);
     $('clockRing').style.strokeDashoffset = 327 - (327 * pct);
 
-    $('sideState').textContent = snap.mode === 'off' ? 'إجازة' : snap.state;
-    $('sideMeta').textContent  = snap.meta;
+    $('sideState').textContent = st.mode === 'off' ? 'إجازة' : st.state;
+    $('sideMeta').textContent  = st.meta;
 
     const active = S.user.workControl?.date === dayKey()
                 && S.user.workControl?.startedAt
                 && !S.user.workControl?.stoppedAt;
-    $('manualStart').disabled = !!active || snap.mode === 'off' || snap.state === 'انتهى وقت العمل';
+    $('manualStart').disabled = !!active || st.mode === 'off' || st.locked;
     $('manualStop').disabled  = !active;
     $('manualStart').textContent = active ? 'الجلسة جارية' : 'بدء يدوي';
 
@@ -490,12 +761,12 @@
   }
   function manualStart(){
     const key = dayKey();
-    if(!isWorkday(new Date())) return toast('اليوم إجازة.');
+    if(!isWorkday(new Date())) return toast('اليوم إجازة حسب جدولك.');
     const { end } = workWindow(new Date());
-    if(new Date() >= end) return toast('انتهى وقت العمل.');
+    if(new Date() >= end) return toast('انتهى وقت العمل اليوم.');
     persistUser({ workControl: { date:key, startedAt:new Date().toISOString(), stoppedAt:null } });
     renderDashboard();
-    toast('بدأت الجلسة.');
+    toast('بدأت الجلسة اليدوية.');
   }
   function manualStop(){
     if(!S.user.workControl?.startedAt) return;
@@ -504,7 +775,7 @@
     toast('تم حفظ الجلسة.');
   }
 
-  // ─── WORK ───
+  // ── Work ──
   function renderWork(){
     if(!S.user) return;
     const p = S.user.profile;
@@ -534,7 +805,7 @@
         <td>${x.kind === 'deduction' ? '-' : '+'}${fmtNum(x.amount)} EGP</td>
         <td>${shortAr(new Date(x.createdAt))}</td>
         <td><button class="table-action" onclick="Yourself.removeMoney('${x.id}')">حذف</button></td>
-      </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:28px">لا توجد عمليات</td></tr>';
+      </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:24px">لا توجد عمليات</td></tr>';
   }
   function removeMoney(id){
     persistUser({ finance: S.user.finance.filter(x => x.id !== id) });
@@ -572,7 +843,7 @@
           <option value="monthly" ${p.salaryType==='monthly'?'selected':''}>شهري</option>
           <option value="hourly" ${p.salaryType==='hourly'?'selected':''}>بالساعة</option>
         </select></label>
-        <label>أيام/أسبوع<input id="wDays" type="number" min="1" max="7" value="${p.workDays}"></label>
+        <label>أيام / أسبوع<input id="wDays" type="number" min="1" max="7" value="${p.workDays}"></label>
         <label>الإجازة<input id="wOff" type="text" value="${esc(p.offDays)}"></label>
         <label>البداية<input id="wStart" type="time" value="${p.workStart}"></label>
         <label>النهاية<input id="wEnd" type="time" value="${p.workEnd}"></label>
@@ -595,7 +866,7 @@
     toast('تم التحديث.');
   }
 
-  // ─── PLANNER ───
+  // ── Planner ──
   function renderPlanner(){
     if(!S.user) return;
     const d = S.plannerDate;
@@ -680,7 +951,7 @@
     renderFocus();
   }
 
-  // ─── NOTES ───
+  // ── Notes ──
   const noteCatLabel = c => ({ idea:'فكرة', work:'عمل', finance:'مال', health:'صحة', personal:'شخصية' }[c] || c);
   function renderNotes(){
     if(!S.user) return;
@@ -705,7 +976,7 @@
             <button onclick="Yourself.removeNote('${n.id}')">×</button>
           </div>
         </div>
-      </article>`).join('') : '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--ink-3);padding:48px"><b style="font-size:16px;font-family:var(--f-serif)">لا توجد ملاحظات</b><p style="margin-top:8px;font-size:12.5px">اكتب أول ملاحظة للبدء.</p></div>';
+      </article>`).join('') : '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--ink-3);padding:40px"><b style="font-size:15px">لا توجد ملاحظات</b><p style="margin-top:6px;font-size:12.5px">اكتب أول ملاحظة للبدء.</p></div>';
   }
   function openNoteDialog(note=null){
     const n = note || { title:'', content:'', category:'idea' };
@@ -753,7 +1024,7 @@
     toast('تم الحذف.');
   }
 
-  // ─── EXERCISE ───
+  // ── Exercise ──
   function renderExercise(){
     if(!S.user) return;
     const now = new Date();
@@ -833,7 +1104,7 @@
     toast('تم الحذف.');
   }
 
-  // ─── DIET ───
+  // ── Diet ──
   function renderDiet(){
     if(!S.user) return;
     const today = dayKey();
@@ -853,7 +1124,7 @@
         <div class="meal-info">
           <b>${esc(m.name)}</b>
           <small>${esc(m.type || 'وجبة')} · ${m.protein || 0}g بروتين</small>
-          ${m.notes ? `<p style="font-size:11.5px;color:var(--ink-3);margin-top:6px;line-height:1.7">${esc(m.notes)}</p>` : ''}
+          ${m.notes ? `<p style="font-size:11.5px;color:var(--ink-3);margin-top:5px;line-height:1.6">${esc(m.notes)}</p>` : ''}
           <button class="wo-del" onclick="Yourself.removeMeal('${m.id}')">حذف</button>
         </div>
         <span class="meal-kcal">${m.kcal || 0} kcal</span>
@@ -924,7 +1195,7 @@
     toast('تم تصفير الماء.');
   }
 
-  // ─── HEALTH ───
+  // ── Health ──
   const plans = {
     balanced: [['الصباح','ماء + بداية هادئة + ترتيب الأولويات'],['العمل','فواصل قصيرة للحركة'],['بعد العمل','وجبة متنوعة + نشاط خفيف'],['المساء','تهدئة ونوم منتظم']],
     training: [['الأسبوع','3 جلسات نشاط مناسب'],['يوميًا','مشي أو حركة خفيفة'],['الاستشفاء','إحماء وتهدئة'],['المساء','نوم منتظم']],
@@ -987,7 +1258,7 @@
     toast('تم الحفظ.');
   }
 
-  // ─── SETTINGS ───
+  // ── Settings ──
   function renderSettings(){
     if(!S.user) return;
     const p = S.user.profile;
@@ -1020,7 +1291,9 @@
     if(!S.user) return;
     saveUsers(loadUsers().filter(x => x.id !== S.user.id));
     clearSession();
-    location.reload();
+    S.user = null;
+    showLogin();
+    toast('تم حذف الحساب.');
   }
   function openDeleteConfirm(){
     openDialog('حذف الحساب', 'سيتم حذف بياناتك من هذا المتصفح نهائيًا.', `
@@ -1030,79 +1303,7 @@
       </div>`);
   }
 
-  // ─── DEV ───
-  function bindSecret(){
-    const el = $('brandSecret');
-    if(!el) return;
-    el.addEventListener('click', () => {
-      S.secret.count++;
-      clearTimeout(S.secret.timer);
-      S.secret.timer = setTimeout(() => S.secret.count = 0, 1600);
-      if(S.secret.count >= 5){
-        S.secret.count = 0;
-        openDialog('مركز المطوّر', 'الدخول مخفي عن المستخدمين.', `
-          <label>البريد<input id="devEmail" type="email"></label>
-          <label>كلمة المرور<input id="devPassword" type="password"></label>
-          <div class="dialog-actions">
-            <button class="btn btn-primary" onclick="Yourself.devAuth()">دخول</button>
-            <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
-          </div>`);
-      }
-    });
-  }
-  function devAuth(){
-    const e = emailOf($('devEmail').value), p = $('devPassword').value;
-    if(!DEVS.some(x => x.email === e && x.pass === p)) return toast('بيانات غير صحيحة.');
-    openDevCenter();
-  }
-  function openDevCenter(){
-    closeDialog();
-    const list = loadUsers();
-    const ops = list.reduce((a,u) => a + (u.finance?.length || 0), 0);
-    const notes = list.reduce((a,u) => a + (u.notes?.length || 0), 0);
-    const wks = list.reduce((a,u) => a + (u.workouts?.length || 0), 0);
-    openDialog('مركز المطوّر', 'إدارة الحسابات المحلية.', `
-      <div class="dev-summary">
-        <div class="dev-stat"><span>حسابات</span><b>${list.length}</b></div>
-        <div class="dev-stat"><span>مالية</span><b>${ops}</b></div>
-        <div class="dev-stat"><span>ملاحظات</span><b>${notes}</b></div>
-        <div class="dev-stat"><span>تمارين</span><b>${wks}</b></div>
-      </div>
-      <div>
-        ${list.length ? list.map(u => `
-          <div class="dev-user">
-            <strong>${esc(u.name)}</strong>
-            <span>${esc(u.email)}</span>
-            <span>${esc(u.profile?.job || '—')} · ${fmtMoney(u.profile?.salary || 0)}</span>
-            <div class="dev-actions">
-              <button onclick="Yourself.inspectUser('${u.id}')">عرض</button>
-              <button onclick="Yourself.deleteUser('${u.id}')">حذف</button>
-            </div>
-          </div>`).join('') : '<div class="empty">لا توجد حسابات.</div>'}
-      </div>`);
-  }
-  function inspectUser(id){
-    const u = loadUsers().find(x => x.id === id);
-    if(!u) return;
-    openDialog('بيانات المستخدم', '', `
-      <div class="empty" style="text-align:right;border-style:solid;background:var(--surface-2)">
-        <b>${esc(u.name)}</b>
-        <span style="display:block;margin-top:8px;line-height:2">
-          البريد: ${esc(u.email)}<br>
-          الوظيفة: ${esc(u.profile?.job || '—')}<br>
-          الدخل: ${fmtMoney(u.profile?.salary || 0)}<br>
-          العمل: ${esc(u.profile?.workStart || '—')} → ${esc(u.profile?.workEnd || '—')}<br>
-          العمر: ${esc(u.profile?.age || '—')} · الوزن: ${esc(u.profile?.weight || '—')} · الطول: ${esc(u.profile?.height || '—')}
-        </span>
-      </div>`);
-  }
-  function deleteUser(id){
-    saveUsers(loadUsers().filter(x => x.id !== id));
-    openDevCenter();
-    toast('تم الحذف.');
-  }
-
-  // ─── GLOBAL SEARCH ───
+  // ── Global search ──
   function globalSearch(q){
     q = q.trim().toLowerCase();
     if(!q) return;
@@ -1110,43 +1311,103 @@
     S.user.planner.forEach(t => { if(t.title.toLowerCase().includes(q)) results.push({ type:'مهمة', text:t.title, page:'planner' }); });
     S.user.notes.forEach(n => { if((n.title + ' ' + n.content).toLowerCase().includes(q)) results.push({ type:'ملاحظة', text:n.title, page:'notes' }); });
     S.user.workouts.forEach(w => { if(w.name.toLowerCase().includes(q)) results.push({ type:'تمرين', text:w.name, page:'exercise' }); });
-    if(!results.length){
-      openDialog('لا نتائج', `لم نعثر على شيء يطابق "${esc(q)}"`, '');
-      return;
-    }
+    if(!results.length){ openDialog('لا نتائج', `لم نعثر على شيء يطابق "${esc(q)}"`, ''); return; }
     openDialog('نتائج البحث', `${results.length} نتيجة`, `
       <div style="display:flex;flex-direction:column;gap:8px">
         ${results.slice(0,20).map(r => `
-          <button onclick="Yourself.go('${r.page}');Yourself.closeDialog()" style="text-align:right;padding:14px;background:var(--surface-2);border-radius:14px;border:1px solid var(--line)">
+          <button onclick="Yourself.go('${r.page}');Yourself.closeDialog()" style="text-align:right;padding:12px;background:var(--surface-2);border-radius:12px;border:1px solid var(--line);cursor:pointer;color:var(--ink)">
             <small style="color:var(--ink-3);font-size:10.5px">${r.type}</small>
             <div style="font-weight:600;font-size:13px;margin-top:3px">${esc(r.text)}</div>
           </button>`).join('')}
       </div>`);
   }
 
-  // ═══════════ BINDINGS ═══════════
+  // ═══════════════════════════════════════════════════════
+  // BINDINGS
+  // ═══════════════════════════════════════════════════════
   function bindAuth(){
-    $$('.auth-tab').forEach(b => b.addEventListener('click', () => switchAuth(b.dataset.mode)));
-    $$('[data-pass]').forEach(b => b.addEventListener('click', () => togglePass(b.dataset.pass, b)));
-    $('regPass').addEventListener('input', strength);
+    // password toggles
+    $$('[data-pass]').forEach(b => b.addEventListener('click', () => {
+      const el = $(b.dataset.pass);
+      el.type = el.type === 'password' ? 'text' : 'password';
+      b.textContent = el.type === 'password' ? 'إظهار' : 'إخفاء';
+    }));
+
+    // login
     $('loginForm').addEventListener('submit', login);
-    $('registerForm').addEventListener('submit', register);
+    $('forgotBtn').addEventListener('click', () =>
+      openDialog('استعادة كلمة المرور', 'تواصل مع مطوّر النظام لاستعادة الوصول.', ''));
+    $('goSignupBtn').addEventListener('click', showAccount);
+
+    // account
+    $('accountForm').addEventListener('submit', accountSubmit);
+    $('accPass').addEventListener('input', strengthAccount);
+    $('backFromAccount').addEventListener('click', showLogin);
+
+    // register wizard
+    $('registerForm').addEventListener('submit', registerSubmit);
     $('wNext').addEventListener('click', wizardNext);
     $('wPrev').addEventListener('click', wizardPrev);
-    // رابط "إنشاء حساب" أسفل نموذج الدخول
-    const toReg = $('toRegister');
-    if(toReg) toReg.addEventListener('click', () => switchAuth('register'));
-    // عند الضغط Enter في الخطوات 1-3 → التالي بدل الإرسال
+    $('backFromRegister').addEventListener('click', showAccount);
     $('registerForm').addEventListener('keydown', e => {
-      if(e.key === 'Enter' && S.wizard < 4){
+      if(e.key === 'Enter' && !e.target.matches('textarea')){
         e.preventDefault();
-        wizardNext();
+        if(S.wizard < 3) wizardNext();
+        else registerSubmit(e);
       }
     });
+
+    // pending
+    $('backToLoginFromPending').addEventListener('click', showLogin);
+
+    // developer
+    $('devLogoutBtn').addEventListener('click', () => {
+      clearDevSession();
+      showLogin();
+    });
+    $('devNotifBtn').addEventListener('click', () => {
+      S.devFilter = 'pending';
+      $$('.dfilter').forEach(x => x.classList.toggle('active', x.dataset.status === 'pending'));
+      renderDevList();
+      // scroll to list
+      $('devList').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    $$('.dfilter').forEach(b => b.addEventListener('click', () => {
+      S.devFilter = b.dataset.status;
+      $$('.dfilter').forEach(x => x.classList.toggle('active', x === b));
+      renderDevList();
+    }));
+
+    // secret: 5 clicks on brand from login -> open dev login
+    const brandSecret = $('brandSecret');
+    if(brandSecret){
+      brandSecret.addEventListener('click', () => {
+        S.secret.count++;
+        clearTimeout(S.secret.timer);
+        S.secret.timer = setTimeout(() => S.secret.count = 0, 1600);
+        if(S.secret.count >= 5){
+          S.secret.count = 0;
+          openDialog('دخول المطوّر', 'هذا الدخول محمي بكلمة مرور.', `
+            <label>البريد<input id="devEmail" type="email"></label>
+            <label>كلمة المرور<input id="devPassword" type="password"></label>
+            <div class="dialog-actions">
+              <button class="btn btn-primary" onclick="Yourself.devLogin()">دخول</button>
+              <button class="btn btn-ghost" onclick="Yourself.closeDialog()">إلغاء</button>
+            </div>`);
+        }
+      });
+    }
+  }
+  function devLogin(){
+    const e = emailOf($('devEmail').value);
+    const p = $('devPassword').value;
+    if(!DEVS.some(x => x.email === e && x.pass === p)) return toast('بيانات غير صحيحة.');
+    setDevSession(e);
+    closeDialog();
+    showDev();
   }
 
   function bindApp(){
-    // navigation (sidebar + bottom + links)
     $$('.sb-item, .bn-item').forEach(b => {
       if(b.dataset.page) b.addEventListener('click', () => go(b.dataset.page));
     });
@@ -1164,22 +1425,15 @@
         }
       }
     });
-
-    // top
     $('logoutBtn').addEventListener('click', logout);
     $('profileBtn').addEventListener('click', () => go('settings'));
     $('themeBtn').addEventListener('click', cycleTheme);
-    $('notifBtn').addEventListener('click', () => toast('لا توجد إشعارات جديدة ✦'));
     $('globalSearch').addEventListener('keydown', e => { if(e.key === 'Enter') globalSearch(e.target.value); });
     document.addEventListener('keydown', e => {
       if((e.ctrlKey || e.metaKey) && e.key === 'k'){ e.preventDefault(); $('globalSearch').focus(); }
     });
-
-    // dashboard
     $('manualStart').addEventListener('click', manualStart);
     $('manualStop').addEventListener('click', manualStop);
-
-    // work
     $('editWorkBtn').addEventListener('click', openWorkDialog);
     $('addMoneyBtn').addEventListener('click', openMoneyDialog);
     $$('.filter[data-money]').forEach(b => b.addEventListener('click', () => {
@@ -1187,16 +1441,12 @@
       $$('.filter[data-money]').forEach(x => x.classList.toggle('active', x === b));
       renderWork();
     }));
-
-    // planner
     $('addTaskBtn').addEventListener('click', openTaskDialog);
     $('prevDayBtn').addEventListener('click', () => { S.plannerDate.setDate(S.plannerDate.getDate() - 1); renderPlanner(); });
     $('nextDayBtn').addEventListener('click', () => { S.plannerDate.setDate(S.plannerDate.getDate() + 1); renderPlanner(); });
     $('todayBtn').addEventListener('click', () => { S.plannerDate = new Date(); renderPlanner(); });
     $('focusToggle').addEventListener('click', toggleFocus);
     $('focusReset').addEventListener('click', resetFocus);
-
-    // notes
     $('newNoteBtn').addEventListener('click', () => openNoteDialog());
     $('noteSearch').addEventListener('input', e => { S.noteSearch = e.target.value.trim().toLowerCase(); renderNotes(); });
     $$('.filter[data-note]').forEach(b => b.addEventListener('click', () => {
@@ -1204,54 +1454,63 @@
       $$('.filter[data-note]').forEach(x => x.classList.toggle('active', x === b));
       renderNotes();
     }));
-
-    // exercise
     $('addWorkoutBtn').addEventListener('click', openWorkoutDialog);
     $$('.filter[data-ex]').forEach(b => b.addEventListener('click', () => {
       S.exFilter = b.dataset.ex;
       $$('.filter[data-ex]').forEach(x => x.classList.toggle('active', x === b));
       renderExercise();
     }));
-
-    // diet
     $('addMealBtn').addEventListener('click', openMealDialog);
     $('addWaterBtn').addEventListener('click', addWater);
     $('resetWaterBtn').addEventListener('click', resetWater);
-
-    // health
     $('editHealthBtn').addEventListener('click', openHealthDialog);
     $('changePlanBtn').addEventListener('click', changePlan);
-
-    // settings
     $('settingsForm').addEventListener('submit', saveSettings);
     $('deleteLocalBtn').addEventListener('click', openDeleteConfirm);
     $$('.theme-tile').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
   }
-
   function cycleTheme(){
-    const order = ['royal','ivory','night','mint','ocean','forest'];
-    const cur = getPref().theme || 'royal';
+    const order = ['teal','mint','dark','ocean'];
+    const cur = getPref().theme || 'teal';
     const next = order[(order.indexOf(cur) + 1) % order.length];
     setTheme(next);
     toast('الثيم: ' + next);
   }
 
-  // ═══════════ BOOT ═══════════
+  // ═══════════════════════════════════════════════════════
+  // BOOT
+  // ═══════════════════════════════════════════════════════
   function boot(){
-    setTheme(getPref().theme || 'royal');
+    setTheme(getPref().theme || 'teal');
     bindAuth();
     bindApp();
-    bindSecret();
+    startDevTick();
+
+    // Check dev session first
+    const ds = getDevSession();
+    if(ds?.email){
+      return showDev();
+    }
+
+    // Check user session
     const s = getSession();
     if(s?.email){
       const u = loadUsers().find(x => emailOf(x.email) === emailOf(s.email));
-      if(u) enterApp(u);
+      if(u && u.status === 'approved'){
+        return enterApp(u);
+      }
+      // session exists but user not approved → clear
+      clearSession();
     }
+
+    showLogin();
   }
 
-  // ═══════════ EXPOSE ═══════════
+  // ═══════════════════════════════════════════════════════
+  // EXPOSE
+  // ═══════════════════════════════════════════════════════
   window.Yourself = {
-    go, closeDialog,
+    go, closeDialog, devLogin,
     saveMoney, removeMoney, saveWork,
     saveTask,
     saveNote, editNote, pinNote, removeNote,
@@ -1259,7 +1518,7 @@
     saveMeal, removeMeal, addWater, setWater, resetWater,
     toggleHabit, saveHealth, changePlan,
     saveSettings, deleteAccount, openDeleteConfirm,
-    devAuth, inspectUser, deleteUser
+    approveUser, rejectUser, inspectUser, deleteUser
   };
 
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
