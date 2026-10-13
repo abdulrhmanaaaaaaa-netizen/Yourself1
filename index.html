@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0F766E">
-<title>Yourself — مساحة العمل الشخصية</title>
+<title>Yourself</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,17 +13,14 @@
 <body>
 <div class="shell">
 
-<!-- ══════════ LOGIN ══════════ -->
+<!-- ══════ LOGIN ══════ -->
 <section id="s-login" class="screen">
-  <div class="aurora"><i></i><i></i><i></i></div>
+  <div class="aurora"><i></i><i></i></div>
   <div class="auth-split">
     <aside class="auth-left">
       <div class="brand"><div class="logo"><img src="https://up6.cc/2026/10/179139150824181.png" alt="Y"></div><b>Yourself</b></div>
       <h1>مساحتك الشخصية<br>لإدارة يومك ومالك.</h1>
-      <p>عمل، وقت، مال، تمارين، غذاء، صحة — بكفاءة ووضوح.</p>
-      <div class="auth-badges">
-        <span>عدّاد تلقائي</span><span>ميزانية ذكية</span><span>تمارين وجيم</span><span>تتبع صحي</span>
-      </div>
+      <p>عمل، وقت، مال، صحة — بكفاءة ووضوح.</p>
     </aside>
     <div class="auth-right">
       <div class="auth-card">
@@ -46,38 +43,26 @@
   </div>
 </section>
 
-<!-- ══════════ SIGNUP ══════════ -->
+<!-- ══════ SIGNUP ══════ -->
 <section id="s-signup" class="screen">
-  <div class="aurora"><i></i><i></i><i></i></div>
+  <div class="aurora"><i></i><i></i></div>
   <header class="mini-top">
     <div class="brand sm"><div class="logo"><img src="https://up6.cc/2026/10/179139150824181.png" alt="Y"></div><b>Yourself</b></div>
     <button class="back" id="backLogin">← رجوع</button>
   </header>
   <div class="center">
-    <div class="stepper">
-      <div class="step done"><b>✓</b><span>الحساب</span></div>
-      <div class="step-line done"></div>
-      <div class="step on" data-s="1"><b>2</b><span>الشخصية</span></div>
-      <div class="step-line"></div>
-      <div class="step" data-s="2"><b>3</b><span>العمل</span></div>
-      <div class="step-line"></div>
-      <div class="step" data-s="3"><b>4</b><span>الروتين</span></div>
-    </div>
-
     <form id="f-account" class="wcard">
-      <header class="wc-head"><span class="eyebrow">STEP 01</span><h2>بيانات الحساب</h2><p>البريد وكلمة المرور فقط.</p></header>
+      <header class="wc-head"><span class="eyebrow">STEP 01</span><h2>بيانات الحساب</h2></header>
       <div class="two">
-        <label class="fl"><span>الاسم الكامل</span><div class="fi"><i>◉</i><input id="aName" required placeholder="اسمك"></div></label>
-        <label class="fl"><span>البريد الإلكتروني</span><div class="fi"><i>✉</i><input id="aEmail" type="email" required placeholder="you@example.com"></div></label>
+        <label class="fl"><span>الاسم</span><div class="fi"><i>◉</i><input id="aName" required placeholder="اسمك"></div></label>
+        <label class="fl"><span>البريد</span><div class="fi"><i>✉</i><input id="aEmail" type="email" required placeholder="you@example.com"></div></label>
       </div>
       <div class="two">
         <label class="fl"><span>كلمة المرور</span>
           <div class="fi"><i>⌑</i><input id="aPass" type="password" required placeholder="8 أحرف">
             <button type="button" class="eye" data-eye="aPass">إظهار</button></div>
         </label>
-        <label class="fl"><span>تأكيد كلمة المرور</span>
-          <div class="fi"><i>✓</i><input id="aPass2" type="password" required placeholder="أعد الكتابة"></div>
-        </label>
+        <label class="fl"><span>التأكيد</span><div class="fi"><i>✓</i><input id="aPass2" type="password" required placeholder="أعد"></div></label>
       </div>
       <button class="btn btn-primary btn-lg" type="submit">متابعة →</button>
       <div id="aMsg" class="msg"></div>
@@ -85,32 +70,31 @@
 
     <form id="f-wizard" class="wcard hidden">
       <div class="pane on" data-pane="1">
-        <header class="wc-head"><span class="eyebrow">STEP 02</span><h2>البيانات الشخصية</h2><p>لمتابعة صحية دقيقة.</p></header>
+        <header class="wc-head"><span class="eyebrow">STEP 02</span><h2>البيانات الشخصية</h2></header>
         <div class="three">
           <label class="fl"><span>العمر</span><input id="wAge" type="number" placeholder="25"></label>
-          <label class="fl"><span>الوزن (kg)</span><input id="wWeight" type="number" step="0.1" placeholder="70"></label>
-          <label class="fl"><span>الطول (cm)</span><input id="wHeight" type="number" step="0.1" placeholder="175"></label>
+          <label class="fl"><span>الوزن</span><input id="wWeight" type="number" step="0.1" placeholder="70"></label>
+          <label class="fl"><span>الطول</span><input id="wHeight" type="number" step="0.1" placeholder="175"></label>
         </div>
-        <div class="fl"><span>مستوى النشاط</span>
+        <label class="fl"><span>مستوى النشاط</span>
           <div class="chips">
             <label><input type="radio" name="act" value="light"><span>خفيف</span></label>
             <label><input type="radio" name="act" value="moderate" checked><span>متوسط</span></label>
             <label><input type="radio" name="act" value="high"><span>مرتفع</span></label>
           </div>
-        </div>
+        </label>
       </div>
-
       <div class="pane" data-pane="2">
-        <header class="wc-head"><span class="eyebrow">STEP 03</span><h2>العمل والدخل</h2><p>لحساب قيمة ساعتك تلقائيًا.</p></header>
+        <header class="wc-head"><span class="eyebrow">STEP 03</span><h2>العمل والدخل</h2></header>
         <div class="two">
-          <label class="fl"><span>الوظيفة / المجال</span><input id="wJob" required placeholder="مطور، مهندس..."></label>
+          <label class="fl"><span>الوظيفة</span><input id="wJob" required placeholder="مطور"></label>
           <label class="fl"><span>نوع الدخل</span>
-            <select id="wType"><option value="monthly">راتب شهري</option><option value="hourly">أجر بالساعة</option></select>
+            <select id="wType"><option value="monthly">شهري</option><option value="hourly">بالساعة</option></select>
           </label>
         </div>
         <div class="two">
           <label class="fl"><span>الدخل (EGP)</span><input id="wSalary" type="number" required placeholder="8750"></label>
-          <label class="fl"><span>أيام العمل / أسبوع</span>
+          <label class="fl"><span>أيام / أسبوع</span>
             <select id="wDays"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option></select>
           </label>
         </div>
@@ -120,22 +104,20 @@
         </div>
         <label class="fl"><span>أيام الإجازة</span><input id="wOff" value="الجمعة، السبت"></label>
       </div>
-
       <div class="pane" data-pane="3">
-        <header class="wc-head"><span class="eyebrow">STEP 04</span><h2>الروتين والأهداف</h2><p>سنبني جدولك بناءً عليها.</p></header>
+        <header class="wc-head"><span class="eyebrow">STEP 04</span><h2>الروتين والأهداف</h2></header>
         <div class="two">
-          <label class="fl"><span>وقت الاستيقاظ</span><input id="wWake" type="time" value="07:00"></label>
-          <label class="fl"><span>وقت النوم</span><input id="wSleep" type="time" value="23:00"></label>
+          <label class="fl"><span>الاستيقاظ</span><input id="wWake" type="time" value="07:00"></label>
+          <label class="fl"><span>النوم</span><input id="wSleep" type="time" value="23:00"></label>
         </div>
         <div class="two">
           <label class="fl"><span>هدف السعرات</span><input id="wCalGoal" type="number" value="2000"></label>
           <label class="fl"><span>هدف الماء (كوب)</span><input id="wWaterGoal" type="number" value="8"></label>
         </div>
-        <label class="fl"><span>هدفك الأساسي</span>
-          <select id="wGoal"><option>تنظيم الوقت</option><option>زيادة الدخل</option><option>اللياقة البدنية</option><option>نظام غذائي صحي</option><option>التوازن</option></select>
+        <label class="fl"><span>هدفك</span>
+          <select id="wGoal"><option>تنظيم الوقت</option><option>زيادة الدخل</option><option>اللياقة</option><option>صحي</option><option>التوازن</option></select>
         </label>
       </div>
-
       <div class="wactions">
         <button type="button" class="btn btn-ghost" id="wPrev" disabled>السابق</button>
         <button type="button" class="btn btn-primary" id="wNext">التالي →</button>
@@ -146,9 +128,9 @@
   </div>
 </section>
 
-<!-- ══════════ PENDING ══════════ -->
+<!-- ══════ PENDING ══════ -->
 <section id="s-pending" class="screen">
-  <div class="aurora"><i></i><i></i><i></i></div>
+  <div class="aurora"><i></i><i></i></div>
   <div class="center">
     <div class="pending">
       <div class="pr"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" class="pr-b"/><circle cx="50" cy="50" r="42" class="pr-f"/></svg><span>⏳</span></div>
@@ -158,60 +140,80 @@
         <div><span>البريد</span><b id="pendEmail">—</b></div>
         <div><span>الحالة</span><b class="st-pend">قيد المراجعة</b></div>
       </div>
-      <button class="btn btn-primary btn-lg" id="backLogin2">رجوع لتسجيل الدخول</button>
+      <button class="btn btn-primary btn-lg" id="backLogin2">رجوع</button>
     </div>
   </div>
 </section>
 
-<!-- ══════════ APP ══════════ -->
+<!-- ══════ APP ══════ -->
 <section id="s-app" class="app hidden">
 
-  <!-- ═══ BAR 1 · TOP ═══ -->
-  <header class="b-top">
-    <div class="bt-l">
-      <div class="brand sm"><div class="logo"><img src="https://up6.cc/2026/10/179139150824181.png" alt="Y"></div><b>Yourself</b></div>
-    </div>
-    <div class="bt-m">
-      <div class="search"><i>⌕</i><input id="gSearch" placeholder="بحث..."><kbd>⌘K</kbd></div>
-    </div>
-    <div class="bt-r">
-      <button class="ib" id="themeBtn" title="المظهر">◐</button>
-      <button class="prof" id="profileBtn"><span class="av" id="avatar">Y</span>
-        <div class="pi"><b id="uName">—</b><small id="uJob">—</small></div>
-      </button>
-    </div>
+  <!-- TOP BAR · هامبرغر -->
+  <header class="topbar">
+    <button class="ham" id="hamBtn" aria-label="القائمة">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="brand sm"><div class="logo"><img src="https://up6.cc/2026/10/179139150824181.png" alt="Y"></div><b>Yourself</b></div>
+    <div class="tb-spacer"></div>
+    <button class="ib" id="themeBtn" title="المظهر">◐</button>
+    <button class="prof" id="profileBtn"><span class="av" id="avatar">Y</span>
+      <div class="pi"><b id="uName">—</b><small id="uJob">—</small></div>
+    </button>
   </header>
 
-  <!-- ═══ BAR 2 · TABS (التنقل الوحيد) ═══ -->
-  <nav class="b-tabs" id="bTabs">
-    <button class="tab on" data-page="home"><i>⌂</i><span>الرئيسية</span></button>
-    <button class="tab" data-page="work"><i>◷</i><span>العمل</span></button>
-    <button class="tab" data-page="money"><i>₪</i><span>المال</span></button>
-    <button class="tab" data-page="planner"><i>☷</i><span>الوقت</span></button>
-    <button class="tab" data-page="notes"><i>✎</i><span>المذكرة</span></button>
-    <button class="tab" data-page="exercise"><i>⚡</i><span>تمارين</span></button>
-    <button class="tab" data-page="diet"><i>◆</i><span>الغذاء</span></button>
-    <button class="tab" data-page="health"><i>♡</i><span>الصحة</span></button>
-    <button class="tab" data-page="calc"><i>=</i><span>حاسبة</span></button>
-    <button class="tab" data-page="settings"><i>⚙</i><span>الإعدادات</span></button>
-    <button class="tab dev-tab hidden" data-page="dev" id="tabDev"><i>◆</i><span>المطوّر</span></button>
-  </nav>
+  <!-- DRAWER (القائمة الجانبية) -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer">
+    <div class="dr-head">
+      <div class="dr-user">
+        <div class="av av-lg" id="drAvatar">Y</div>
+        <div>
+          <b id="drName">—</b>
+          <small id="drEmail">—</small>
+        </div>
+      </div>
+    </div>
 
-  <!-- ═══ CONTENT ═══ -->
+    <nav class="dr-nav">
+      <span class="dr-label">الرئيسية</span>
+      <button class="dr-item on" data-page="home"><i>⌂</i><span>لوحة التحكم</span></button>
+
+      <span class="dr-label">الإنتاجية</span>
+      <button class="dr-item" data-page="work"><i>◷</i><span>العمل والدخل</span></button>
+      <button class="dr-item" data-page="money"><i>₪</i><span>إدارة الأموال</span></button>
+      <button class="dr-item" data-page="planner"><i>☷</i><span>تنظيم الوقت</span></button>
+      <button class="dr-item" data-page="notes"><i>✎</i><span>المذكرة</span></button>
+
+      <span class="dr-label">الصحة</span>
+      <button class="dr-item" data-page="exercise"><i>⚡</i><span>التمارين والجيم</span></button>
+      <button class="dr-item" data-page="diet"><i>◆</i><span>الغذاء والرجيم</span></button>
+      <button class="dr-item" data-page="health"><i>♡</i><span>الصحة والعادات</span></button>
+
+      <span class="dr-label">أدوات</span>
+      <button class="dr-item" data-page="calc"><i>=</i><span>الحاسبة</span></button>
+      <button class="dr-item" data-page="settings"><i>⚙</i><span>الإعدادات</span></button>
+      <button class="dr-item dev hidden" data-page="dev" id="drDev"><i>◆</i><span>لوحة المطوّر</span></button>
+    </nav>
+
+    <div class="dr-foot">
+      <button class="dr-logout" id="logoutBtn">تسجيل الخروج ↗</button>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
   <main class="main">
 
+    <!-- HOME -->
     <section class="page on" id="pg-home">
       <header class="ph"><div><span class="eyebrow">DASHBOARD</span><h1>مرحبًا، <em id="hName">—</em></h1><p id="hSub">—</p></div>
         <div class="dchip"><small id="wDay">—</small><b id="dDate">—</b></div>
       </header>
-
       <div class="kpis">
         <div class="kpi primary"><span>المكتسب الكلي</span><strong id="kTotal">0</strong><small>EGP</small><i class="glow"></i></div>
         <div class="kpi"><span>مكتسب اليوم</span><strong id="kToday">0</strong><small id="kTodayMeta">—</small></div>
         <div class="kpi"><span>قيمة الساعة</span><strong id="kHour">0</strong><small>EGP / ساعة</small></div>
         <div class="kpi"><span>رصيد الشهر</span><strong id="kMonth">0</strong><small>EGP</small></div>
       </div>
-
       <div class="g2">
         <div class="card">
           <div class="ch"><div><span class="eyebrow">SMART CLOCK</span><h2>العدّاد التلقائي</h2></div><span class="pill" id="clockBadge">—</span></div>
@@ -230,13 +232,11 @@
             </div>
           </div>
         </div>
-
         <div class="card">
           <div class="ch"><div><span class="eyebrow">TODAY</span><h2>مهام اليوم</h2></div></div>
           <div id="nextList" class="list-slim"></div>
         </div>
       </div>
-
       <div class="g2">
         <div class="card">
           <div class="ch"><div><span class="eyebrow">EARNINGS</span><h2>تراكم الأرباح</h2></div></div>
@@ -247,7 +247,6 @@
             <div><span>معدل اليوم</span><b id="earnAvg">0</b></div>
           </div>
         </div>
-
         <div class="card">
           <div class="ch"><div><span class="eyebrow">NOTES</span><h2>آخر الملاحظات</h2></div></div>
           <div id="notePreview" class="np-list"></div>
@@ -255,16 +254,17 @@
       </div>
     </section>
 
+    <!-- WORK -->
     <section class="page" id="pg-work">
-      <header class="ph"><div><span class="eyebrow">WORK & RATE</span><h1>العمل والدخل</h1><p>احسب قيمة وقتك وتابع يومك.</p></div>
-        <button class="btn btn-ghost" id="editWork">تعديل البيانات</button>
+      <header class="ph"><div><span class="eyebrow">WORK</span><h1>العمل والدخل</h1></div>
+        <button class="btn btn-ghost" id="editWork">تعديل</button>
       </header>
       <div class="g2">
         <div class="card">
           <div class="ch"><div><span class="eyebrow">RATE</span><h2>قيمة الساعة</h2></div></div>
           <div class="rate"><span class="rc">EGP</span><strong id="bigRate">0</strong><span class="rp">/ساعة</span></div>
           <div class="rgrid">
-            <div><span>الدخل الأساسي</span><b id="wSalaryV">—</b></div>
+            <div><span>الدخل</span><b id="wSalaryV">—</b></div>
             <div><span>ساعات / يوم</span><b id="wHoursD">—</b></div>
             <div><span>أيام / أسبوع</span><b id="wDaysV">—</b></div>
             <div><span>الدوام</span><b id="wSched">—</b></div>
@@ -277,13 +277,14 @@
         </div>
       </div>
       <div class="card" style="margin-top:16px">
-        <div class="ch"><div><span class="eyebrow">EARNINGS TREND</span><h2>آخر 30 يوم</h2></div></div>
+        <div class="ch"><div><span class="eyebrow">30 DAYS</span><h2>آخر 30 يوم</h2></div></div>
         <div id="earnChart" class="week-chart" style="height:220px"></div>
       </div>
     </section>
 
+    <!-- MONEY -->
     <section class="page" id="pg-money">
-      <header class="ph"><div><span class="eyebrow">FINANCE</span><h1>إدارة الأموال</h1><p>دخل، مصروفات، ميزانية.</p></div>
+      <header class="ph"><div><span class="eyebrow">FINANCE</span><h1>إدارة الأموال</h1></div>
         <button class="btn btn-primary" id="addMoney">+ حركة</button>
       </header>
       <div class="kpis">
@@ -311,8 +312,9 @@
       </div>
     </section>
 
+    <!-- PLANNER -->
     <section class="page" id="pg-planner">
-      <header class="ph"><div><span class="eyebrow">TIME</span><h1>تنظيم الوقت</h1><p>ابنِ يومك بذكاء.</p></div>
+      <header class="ph"><div><span class="eyebrow">TIME</span><h1>تنظيم الوقت</h1></div>
         <button class="btn btn-primary" id="addTask">+ مهمة</button>
       </header>
       <div class="toolbar card">
@@ -339,8 +341,9 @@
       </div>
     </section>
 
+    <!-- NOTES -->
     <section class="page" id="pg-notes">
-      <header class="ph"><div><span class="eyebrow">JOURNAL</span><h1>المذكرة</h1><p>أفكارك في مكان واحد.</p></div>
+      <header class="ph"><div><span class="eyebrow">JOURNAL</span><h1>المذكرة</h1></div>
         <button class="btn btn-primary" id="newNote">+ ملاحظة</button>
       </header>
       <div class="toolbar card">
@@ -350,8 +353,9 @@
       <div id="notesGrid" class="notes-grid"></div>
     </section>
 
+    <!-- EXERCISE -->
     <section class="page" id="pg-exercise">
-      <header class="ph"><div><span class="eyebrow">TRAINING</span><h1>التمارين والجيم</h1><p>سجل جلستك بالتفاصيل.</p></div>
+      <header class="ph"><div><span class="eyebrow">TRAINING</span><h1>التمارين والجيم</h1></div>
         <button class="btn btn-primary" id="addWorkout">+ تمرين</button>
       </header>
       <div class="kpis">
@@ -373,8 +377,9 @@
       </div>
     </section>
 
+    <!-- DIET -->
     <section class="page" id="pg-diet">
-      <header class="ph"><div><span class="eyebrow">NUTRITION</span><h1>الغذاء</h1><p>وجبات، سعرات، وترطيب.</p></div>
+      <header class="ph"><div><span class="eyebrow">NUTRITION</span><h1>الغذاء والرجيم</h1></div>
         <button class="btn btn-primary" id="addMeal">+ وجبة</button>
       </header>
       <div class="kpis">
@@ -398,8 +403,9 @@
       </div>
     </section>
 
+    <!-- HEALTH -->
     <section class="page" id="pg-health">
-      <header class="ph"><div><span class="eyebrow">HEALTH</span><h1>الصحة والعادات</h1><p>متابعة عامة.</p></div>
+      <header class="ph"><div><span class="eyebrow">HEALTH</span><h1>الصحة والعادات</h1></div>
         <button class="btn btn-ghost" id="editHealth">تعديل</button>
       </header>
       <div class="health-grid">
@@ -422,37 +428,40 @@
       </div>
     </section>
 
+    <!-- CALCULATOR -->
     <section class="page" id="pg-calc">
-      <header class="ph"><div><span class="eyebrow">CALCULATOR</span><h1>حاسبة ذكية</h1><p>حسابات سريعة دقيقة.</p></div></header>
+      <header class="ph"><div><span class="eyebrow">CALCULATOR</span><h1>حاسبة</h1></div></header>
       <div class="calc-wrap">
         <div class="card calc-card">
           <input class="calc-disp" id="calcDisp" readonly value="0">
-          <div class="calc-history" id="calcHistory"></div>
           <div class="calc-grid">
-            <button class="ck" data-c="C">C</button><button class="ck" data-c="⌫">⌫</button>
-            <button class="ck" data-c="%">%</button><button class="ck" data-c="÷">÷</button>
-            <button class="ck" data-c="7">7</button><button class="ck" data-c="8">8</button>
-            <button class="ck" data-c="9">9</button><button class="ck" data-c="×">×</button>
-            <button class="ck" data-c="4">4</button><button class="ck" data-c="5">5</button>
-            <button class="ck" data-c="6">6</button><button class="ck" data-c="−">−</button>
-            <button class="ck" data-c="1">1</button><button class="ck" data-c="2">2</button>
-            <button class="ck" data-c="3">3</button><button class="ck" data-c="+">+</button>
-            <button class="ck" data-c="0">0</button><button class="ck" data-c=".">.</button>
+            <button class="ck" data-c="C">C</button>
+            <button class="ck" data-c="⌫">⌫</button>
+            <button class="ck" data-c="%">%</button>
+            <button class="ck op" data-c="÷">÷</button>
+            <button class="ck" data-c="7">7</button>
+            <button class="ck" data-c="8">8</button>
+            <button class="ck" data-c="9">9</button>
+            <button class="ck op" data-c="×">×</button>
+            <button class="ck" data-c="4">4</button>
+            <button class="ck" data-c="5">5</button>
+            <button class="ck" data-c="6">6</button>
+            <button class="ck op" data-c="−">−</button>
+            <button class="ck" data-c="1">1</button>
+            <button class="ck" data-c="2">2</button>
+            <button class="ck" data-c="3">3</button>
+            <button class="ck op" data-c="+">+</button>
+            <button class="ck" data-c="0">0</button>
+            <button class="ck" data-c=".">.</button>
             <button class="ck eq" data-c="=">=</button>
           </div>
-        </div>
-        <div class="card">
-          <div class="ch"><div><span class="eyebrow">TOOLS</span><h2>حاسبات متخصصة</h2></div></div>
-          <button class="tool-btn" id="toolHour"><b>قيمة الساعة</b><span>من الراتب والدوام</span></button>
-          <button class="tool-btn" id="toolDaily"><b>المكسب اليومي</b><span>من الراتب الشهري</span></button>
-          <button class="tool-btn" id="toolBMI"><b>مؤشر كتلة الجسم</b><span>BMI</span></button>
-          <button class="tool-btn" id="toolCal"><b>السعرات اليومية</b><span>احتياجك التقريبي</span></button>
         </div>
       </div>
     </section>
 
+    <!-- SETTINGS -->
     <section class="page" id="pg-settings">
-      <header class="ph"><div><span class="eyebrow">SETTINGS</span><h1>الإعدادات</h1><p>خصّص تجربتك.</p></div></header>
+      <header class="ph"><div><span class="eyebrow">SETTINGS</span><h1>الإعدادات</h1></div></header>
       <div class="g2">
         <div class="card">
           <div class="ch"><div><span class="eyebrow">PROFILE</span><h2>الملف الشخصي</h2></div></div>
@@ -474,7 +483,7 @@
           <div class="ch"><div><span class="eyebrow">APPEARANCE</span><h2>المظهر</h2></div></div>
           <div class="theme-grid">
             <button class="theme-tile on" data-theme="teal"><i class="tt teal"></i><b>Teal</b><small>أساسي</small></button>
-            <button class="theme-tile" data-theme="slate"><i class="tt slate"></i><b>Slate</b><small>رمادي رسمي</small></button>
+            <button class="theme-tile" data-theme="slate"><i class="tt slate"></i><b>Slate</b><small>رمادي</small></button>
             <button class="theme-tile" data-theme="dark"><i class="tt dark"></i><b>Dark</b><small>ليلي</small></button>
             <button class="theme-tile" data-theme="navy"><i class="tt navy"></i><b>Navy</b><small>كحلي</small></button>
           </div>
@@ -482,8 +491,9 @@
       </div>
     </section>
 
+    <!-- DEV -->
     <section class="page" id="pg-dev">
-      <header class="ph"><div><span class="eyebrow">DEVELOPER</span><h1>لوحة المطوّر</h1><p>إدارة الحسابات والطلبات.</p></div></header>
+      <header class="ph"><div><span class="eyebrow">DEVELOPER</span><h1>لوحة المطوّر</h1></div></header>
       <div class="kpis">
         <div class="kpi"><span>إجمالي</span><strong id="dTotal">0</strong><small>حساب</small></div>
         <div class="kpi primary"><span>بالانتظار</span><strong id="dPend">0</strong><small>طلب</small><i class="glow"></i></div>
@@ -502,14 +512,6 @@
     </section>
 
   </main>
-
-  <!-- ═══ BAR 3 · STATUS (رفيع، ليس تنقلاً) ═══ -->
-  <footer class="b-status">
-    <div class="st-left"><i class="dot"></i><span>متصل</span></div>
-    <div class="st-mid"><b id="stTime">—</b></div>
-    <div class="st-right"><span id="stUser">—</span></div>
-  </footer>
-
 </section>
 
 <div id="modal" class="modal hidden"></div>
@@ -517,4 +519,4 @@
 </div>
 <script src="script.js"></script>
 </body>
-      </html>
+  </html>
