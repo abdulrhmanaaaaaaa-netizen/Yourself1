@@ -3,8 +3,8 @@
  * لا تضع service_role أو سر Google في هذا الملف؛ الملف يصل لكل زائر.
  */
 window.YOURSELF_CONFIG = {
-  supabaseUrl: '',
-  supabasePublishableKey: ''
+  supabaseUrl: 'https://jxdzihloouksaebxigrz.supabase.co',
+  supabasePublishableKey: 'sb_publishable_jYfrzGshksyPQZYkKYz7cQ_a8FpXZ_-'
 };
 
 (() => {
